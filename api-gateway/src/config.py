@@ -13,6 +13,7 @@ class Config:
     FILTER_API: str
     SYNTHESIS_LLM: str
     PLANNING_LLM: str
+    DB_LLM: str
 
 
 config = Config(
@@ -22,4 +23,5 @@ config = Config(
     FILTER_API=os.getenv("FILTER_API", ""),
     SYNTHESIS_LLM=os.getenv("SYNTHESIS_LLM", ""),
     PLANNING_LLM=os.getenv("PLANNING_LLM", ""),
+    DB_LLM=os.getenv("DB_LLM", "DB_URL")
 )

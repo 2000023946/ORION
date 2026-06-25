@@ -1,4 +1,4 @@
-from src.config import config
+from src.config import Config
 from src.domain.result_item import ResultItem
 from src.domain.retrieval_step import RetrievalStep
 from src.domain.query import Query
@@ -10,8 +10,9 @@ from src.ports.tool_execution_port import ToolExecutionPort
 
 class FilterTool(ToolExecutionPort):
 
-    def __init__(self, http_port: HttpPort):
+    def __init__(self, http_port: HttpPort, config: Config):
         self.http_port = http_port
+        self.config = config
 
     def execute(self, step: RetrievalStep) -> ResultItem:
 
@@ -20,7 +21,7 @@ class FilterTool(ToolExecutionPort):
 
         # 2. First call: LLM → SQL JSON
         llm_response = self.http_port.post(
-            url=config.SYNTHESIS_LLM,
+            url=self.config.DB_LLM,
             body={
                 "system_prompt": FILTER_PROMPT,
                 "query": request.query.text,
@@ -32,7 +33,7 @@ class FilterTool(ToolExecutionPort):
 
         # 3. Second call: execute SQL against DB service
         db_response = self.http_port.post(
-            url=config.VECTOR_DB_API,  # or DB API endpoint
+            url=self.config.FILTER_API,  # or DB API endpoint
             body={
                 "query": sql_query
             }

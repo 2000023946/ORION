@@ -1,7 +1,7 @@
 import pytest
 
 from src.domain.retrieval_step import RetrievalStep
-from src.infrastructure.real.llm.prompts.filter_prompt import FilterTool
+from src.infrastructure.real.tools.filter_service.filter_tool import FilterTool
 from src.infrastructure.dummy.dummy_http_port import DummyHttpAdapter
 from src.config import config
 
@@ -9,11 +9,11 @@ from src.config import config
 def test_filter_tool_full_pipeline_success():
 
     http = DummyHttpAdapter()
-    tool = FilterTool(http)
+    tool = FilterTool(http, config)
 
     step = RetrievalStep(
         step_id="1",
-        type="filter",
+        type="query",
         input="find active users",
         params={"table": "users"}
     )
@@ -27,11 +27,11 @@ def test_filter_tool_full_pipeline_success():
 def test_filter_tool_calls_llm_then_db():
 
     http = DummyHttpAdapter()
-    tool = FilterTool(http)
+    tool = FilterTool(http, config)
 
     step = RetrievalStep(
         step_id="2",
-        type="filter",
+        type="query",
         input="get users older than 30",
         params={}
     )
@@ -42,7 +42,7 @@ def test_filter_tool_calls_llm_then_db():
         calls.append((url, body))
 
         # LLM call
-        if url == config.SYNTHESIS_LLM:
+        if url == config.DB_LLM:
             return {
                 "content": "SELECT * FROM users WHERE age > 30",
                 "score": 0.0
@@ -62,7 +62,7 @@ def test_filter_tool_calls_llm_then_db():
     result = tool.execute(step)
 
     # Assert call order
-    assert calls[0][0] == config.SYNTHESIS_LLM
+    assert calls[0][0] == config.DB_LLM
     assert calls[1][0] == config.FILTER_API
 
     # Assert SQL passed to DB
@@ -76,11 +76,11 @@ def test_filter_tool_calls_llm_then_db():
 def test_filter_tool_passes_query_and_params():
 
     http = DummyHttpAdapter()
-    tool = FilterTool(http)
+    tool = FilterTool(http, config)
 
     step = RetrievalStep(
         step_id="3",
-        type="filter",
+        type="query",
         input="get orders",
         params={"limit": 10}
     )
@@ -99,6 +99,6 @@ def test_filter_tool_passes_query_and_params():
     tool.execute(step)
 
     # LLM call validation
-    assert config.SYNTHESIS_LLM in captured
-    assert captured[config.SYNTHESIS_LLM]["query"] == "get orders"
-    assert captured[config.SYNTHESIS_LLM]["params"]["limit"] == 10
+    assert config.DB_LLM in captured
+    assert captured[config.DB_LLM]["query"] == "get orders"
+    assert captured[config.DB_LLM]["params"]["limit"] == 10
