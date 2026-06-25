@@ -1,7 +1,8 @@
 class RetrievalStep:
     def __init__(
-        self, step_id: 
-        str, type: str, 
+        self, 
+        step_id: str, 
+        type: str, 
         input: str, 
         params: dict = None, 
         depends_on: list[str] = None
