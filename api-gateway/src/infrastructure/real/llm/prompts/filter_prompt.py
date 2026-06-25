@@ -1,6 +1,6 @@
 # sql_prompt.py
 
-SQL_FILTER_PROMPT = """
+FILTER_PROMPT = """
 You are a SQL query generator.
 
 Rules:
