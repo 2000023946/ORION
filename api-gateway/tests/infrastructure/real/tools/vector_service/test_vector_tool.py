@@ -13,7 +13,7 @@ def test_vector_search_tool_execute_success():
     # Arrange
     http_adapter = DummyHttpAdapter()
 
-    tool = VectorSearchTool(http_adapter)
+    tool = VectorSearchTool(http_adapter, config)
 
     step = RetrievalStep(
         step_id="1",
@@ -35,7 +35,7 @@ def test_vector_search_tool_passes_query_to_http():
     # Arrange
     http_adapter = DummyHttpAdapter()
 
-    tool = VectorSearchTool(http_adapter)
+    tool = VectorSearchTool(http_adapter, config)
 
     step = RetrievalStep(
         step_id="2",
@@ -55,7 +55,7 @@ def test_vector_search_tool_uses_vector_db_url():
     # Arrange
     http_adapter = DummyHttpAdapter()
 
-    tool = VectorSearchTool(http_adapter)
+    tool = VectorSearchTool(http_adapter, config)
 
     step = RetrievalStep(
         step_id="3",

@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from src.config import Config
 from src.domain.result_item import ResultItem
 from src.domain.retrieval_step import RetrievalStep
