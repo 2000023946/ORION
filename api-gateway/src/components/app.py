@@ -1,28 +1,47 @@
-# from src.application.mcp_orchestrator import MCPOrchestrator
-# from src.config import config
-# from src.infrastructure.dummy.dummy_http_port import DummyHttpAdapter
+from src.domain.query import Query
+from src.domain.search_answer import SearchAnswer
 
-# from src.infrastructure.real.tools.vector_service.vector_search_tool import VectorSearchTool
-# from src.infrastructure.real.tools.filter_service.filter_tool import FilterTool
-# from src.infrastructure.real.tools.metadata_service.metadata_tool import MetadataTool
-# from src.infrastructure.real.tools.web_search_adapter.web_search_tool import WebSearchTool
+from src.application.mcp_orchestrator import MCPOrchestrator
+from src.application.graph_executer import GraphExecutor
 
+from src.infrastructure.real.http.requests_http_adapter import RequestsHttpAdapter
+from src.infrastructure.real.llm.adapter.llm_adapter import LLMAdapter
+from src.infrastructure.real.tools.registry.tool_registry import ToolRegistry
 
-# class Application:
-#     def __init__(self):
-#         http = DummyHttpAdapter()
-
-#         self.vector_tool = VectorSearchTool(http, config)
-#         self.filter_tool = FilterTool(http, config)
-#         self.metadata_tool = MetadataTool(http, config)
-#         self.web_tool = WebSearchTool(http, config)
-
-#         self.orchestrator = MCPOrchestrator(
-#             vector_tool=self.vector_tool,
-#             filter_tool=self.filter_tool,
-#             metadata_tool=self.metadata_tool,
-#             web_tool=self.web_tool,
-#         )
+from src.config import config
 
 
-# app = Application()
+class App:
+
+    def __init__(self):
+
+        # ---------------------------
+        # Infrastructure
+        # ---------------------------
+        self.http = RequestsHttpAdapter()
+
+        # ---------------------------
+        # Core ports
+        # ---------------------------
+        self.llm = LLMAdapter(self.http, config)
+        self.tool_registry = ToolRegistry(self.http, config)
+
+        # ---------------------------
+        # Execution engine
+        # ---------------------------
+        self.graph_executor = GraphExecutor(
+            tool_registry=self.tool_registry
+        )
+
+        # ---------------------------
+        # Orchestrator (USE CASE)
+        # ---------------------------
+        self.orchestrator = MCPOrchestrator(
+            llm_port=self.llm,
+            tool_registry_port=self.tool_registry,
+            graph_executor=self.graph_executor
+        )
+
+    async def run(self, query_text: str) -> SearchAnswer:
+        query = Query(text=query_text)
+        return await self.orchestrator.run(query)
