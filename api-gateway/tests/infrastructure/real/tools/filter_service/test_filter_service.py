@@ -102,3 +102,19 @@ def test_filter_tool_passes_query_and_params():
     assert config.DB_LLM in captured
     assert captured[config.DB_LLM]["query"] == "get orders"
     assert captured[config.DB_LLM]["params"]["limit"] == 10
+    
+def test_filter_tool_describe_contract():
+    http = DummyHttpAdapter()
+    tool = FilterTool(http, config)
+
+    desc = tool.describe()
+
+    assert isinstance(desc.name, str)
+    assert isinstance(desc.description, str)
+    assert isinstance(desc.inputs, list)
+    assert isinstance(desc.outputs, list)
+
+    assert len(desc.name) > 0
+    assert len(desc.description) > 10
+    assert len(desc.inputs) > 0
+    assert len(desc.outputs) > 0

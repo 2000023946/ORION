@@ -6,6 +6,7 @@ from src.infrastructure.real.tools.requests.query_search_request import QuerySea
 from src.infrastructure.real.llm.prompts.filter_prompt import FILTER_PROMPT
 from src.ports.http_port import HttpPort
 from src.ports.tool_execution_port import ToolExecutionPort
+from src.domain.tool_description import ToolDescription
 
 
 class FilterTool(ToolExecutionPort):
@@ -43,4 +44,22 @@ class FilterTool(ToolExecutionPort):
         return ResultItem(
             content=db_response.get("content", ""),
             score=db_response.get("score", 0.0)
+        )
+        
+    
+    def describe(self) -> ToolDescription:
+            return ToolDescription(
+            name="Filter Tool",
+            description=(
+                "Converts natural language queries into structured database filters using an LLM, "
+                "then executes the generated query against a database service. "
+                "Used for precise, structured filtering and data retrieval."
+            ),
+            inputs=[
+                "query: str (natural language query to be converted into a structured filter)",
+                "params: dict (optional filtering constraints or metadata)"
+            ],
+            outputs=[
+                "ResultItem containing filtered database results and relevance score"
+            ]
         )
