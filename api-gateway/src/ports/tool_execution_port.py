@@ -11,14 +11,14 @@ class ToolExecutionPort(ABC):
         """Execute the tool using the provided retrieval step."""
         pass
 
-    # @abstractmethod
-    # def describe(self) -> ToolDescription:
-    #     """
-    #     Returns a natural language description of the tool,
-    #     including:
-    #       - what the tool does
-    #       - when it should be used
-    #       - expected inputs
-    #       - expected outputs
-    #     """
-    #     pass
+    @abstractmethod
+    def describe(self) -> ToolDescription:
+        """
+        Returns a natural language description of the tool,
+        including:
+          - what the tool does
+          - when it should be used
+          - expected inputs
+          - expected outputs
+        """
+        pass

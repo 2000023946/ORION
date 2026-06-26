@@ -29,3 +29,6 @@ class WebSearchTool(ToolExecutionPort):
             content=response.get("content", ""),
             score=response.get("score", 0.0)
         )
+    
+    def describe(self):
+        return super().describe()

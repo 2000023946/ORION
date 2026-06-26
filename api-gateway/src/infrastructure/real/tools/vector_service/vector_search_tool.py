@@ -1,6 +1,7 @@
 from src.config import Config
 from src.domain.result_item import ResultItem
 from src.domain.retrieval_step import RetrievalStep
+from src.domain.tool_description import ToolDescription
 from src.infrastructure.real.tools.requests.query_search_request import (
     QuerySearchRequest,
 )
@@ -26,4 +27,20 @@ class VectorSearchTool(ToolExecutionPort):
         return ResultItem(
             content=response.get("content", ""),
             score=response.get("score", 0.0)
+        )
+
+    def describe(self) -> ToolDescription:
+        return ToolDescription(
+            name="Vector Search Tool",
+            description=(
+                "Performs semantic search over a vector database. "
+                "It retrieves the most relevant documents based on embedding similarity."
+            ),
+            inputs=[
+                "query: str (the user search query)",
+                "top_k: int (number of results to return)"
+            ],
+            outputs=[
+                "List[ResultItem] containing matched documents with relevance scores"
+            ]
         )

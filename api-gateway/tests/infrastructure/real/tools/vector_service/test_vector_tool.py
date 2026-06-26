@@ -82,3 +82,20 @@ def test_vector_search_tool_uses_vector_db_url():
     # Assert
     assert captured["url"] == config.VECTOR_DB_API
     assert captured["body"]["query"] == "faiss vs hnsw"
+    
+def test_vector_search_tool_describe_is_stable_contract():
+    http_adapter = DummyHttpAdapter()
+
+    tool = VectorSearchTool(http_adapter, config)
+
+    desc = tool.describe()
+
+    assert isinstance(desc.name, str)
+    assert isinstance(desc.description, str)
+    assert isinstance(desc.inputs, list)
+    assert isinstance(desc.outputs, list)
+
+    assert len(desc.name) > 0
+    assert len(desc.description) > 10
+    assert len(desc.inputs) > 0
+    assert len(desc.outputs) > 0
