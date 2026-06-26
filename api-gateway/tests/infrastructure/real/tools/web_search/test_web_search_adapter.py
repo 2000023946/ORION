@@ -67,3 +67,19 @@ def test_web_search_tool_uses_config_url(monkeypatch):
 
     assert "url" in captured
     assert captured["body"]["query"] == "faiss vs hnsw"
+    
+def test_web_search_tool_describe_contract():
+    http_adapter = DummyHttpAdapter()
+    tool = WebSearchTool(http_adapter, config)
+
+    desc = tool.describe()
+
+    assert isinstance(desc.name, str)
+    assert isinstance(desc.description, str)
+    assert isinstance(desc.inputs, list)
+    assert isinstance(desc.outputs, list)
+
+    assert len(desc.name) > 0
+    assert len(desc.description) > 10
+    assert len(desc.inputs) > 0
+    assert len(desc.outputs) > 0
