@@ -6,6 +6,7 @@ from src.domain.retrieval_plan import RetrievalPlan
 from src.domain.result_item import ResultItem
 from src.domain.retrieval_result import RetrievalResult
 from src.domain.search_answer import SearchAnswer
+from src.domain.tool_description import ToolDescription
 
 
 # -------------------------
@@ -127,3 +128,36 @@ def test_defaults():
 
     assert step.params == {}
     assert step.depends_on == []
+    
+
+
+def test_tool_description_creation():
+    desc = ToolDescription(
+        name="Vector Search",
+        description="Searches vector DB",
+        inputs=["query: str", "top_k: int"],
+        outputs=["List[ResultItem]"]
+    )
+
+    assert desc.name == "Vector Search"
+    assert desc.description == "Searches vector DB"
+    assert desc.inputs == ["query: str", "top_k: int"]
+    assert desc.outputs == ["List[ResultItem]"]
+
+
+def test_tool_description_equality():
+    desc1 = ToolDescription(
+        name="Tool A",
+        description="desc",
+        inputs=["a"],
+        outputs=["b"]
+    )
+
+    desc2 = ToolDescription(
+        name="Tool A",
+        description="desc",
+        inputs=["a"],
+        outputs=["b"]
+    )
+
+    assert desc1 == desc2
