@@ -81,3 +81,19 @@ def test_metadata_tool_converts_request_correctly():
     # ensure request pipeline worked end-to-end
     assert result.content is not None
     assert isinstance(result.score, float)
+    
+def test_metadata_tool_describe_contract():
+    http_adapter = DummyHttpAdapter()
+    tool = MetadataTool(http_adapter, config)
+
+    desc = tool.describe()
+
+    assert isinstance(desc.name, str)
+    assert isinstance(desc.description, str)
+    assert isinstance(desc.inputs, list)
+    assert isinstance(desc.outputs, list)
+
+    assert len(desc.name) > 0
+    assert len(desc.description) > 10
+    assert len(desc.inputs) > 0
+    assert len(desc.outputs) > 0
