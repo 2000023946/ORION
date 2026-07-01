@@ -13,4 +13,9 @@ class DummyGraphExecuter(GraphExecutorPort):
     async def execute(self, query: Query, plan: RetrievalPlan, mcp_server: MCPServerPort) -> Context:
         context: dict[ToolName, Any] = {}
 
+        context[ToolName("search_user")] = "mock_user_123"
+        context[ToolName("get_orders")] = "order_1, order_2, order_3"
+        context[ToolName("get_profile")] = "name: John Doe, age: 21"
+        context[ToolName("generate_recommendation")] = "recommend: product A, product B"
+
         return Context(context)

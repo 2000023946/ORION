@@ -18,7 +18,7 @@ class MetadataFilterTool(ToolPort):
         # ----------------------------
         # 1. Extract input (doc ids from vector search)
         # ----------------------------
-        doc_ids = tool_request.params.get(ToolIOKeys.DOC_IDS)
+        doc_ids = tool_request.params.get(ToolIOKeys.DOCS_IDS)
 
         if not doc_ids:
             return ToolResponse(

@@ -39,9 +39,9 @@ class DummyMCPClient(MCPClientPort):
         rec = context.get(ToolName("generate_recommendation"))
 
         final_answer = (
-            f"User {user.get('name')} from {profile.get('location')} "
-            f"has {len(orders.get('orders', []))} orders. "
-            f"Recommendation: {rec.get('recommendation')}"
+            f"User {user} from {profile} "
+            f"has {orders} orders. "
+            f"Recommendation: {rec}"
         )
         
         return SearchAnswer(answer=final_answer)

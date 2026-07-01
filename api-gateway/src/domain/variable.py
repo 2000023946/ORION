@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from src.infrastructure.real.graph_executor.real_graph_executor import ToolIOKeys
+from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
+
 
 @dataclass
 class Variable:

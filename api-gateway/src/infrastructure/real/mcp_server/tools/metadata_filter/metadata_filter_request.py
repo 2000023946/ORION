@@ -9,7 +9,7 @@ class MetadataFilterRequest(ToolRequest):
     docs_ids: list[DocId]
     @classmethod
     def create(cls, tool_request: ToolRequest) -> MetadataFilterRequest:
-        if ToolIOKeys.DOC_IDS not in tool_request.params:
+        if ToolIOKeys.DOCS_IDS not in tool_request.params:
             raise ValueError("Web search cannot be called without query param")
         
         docs_ids = tool_request.params[ToolIOKeys.QUERY]
