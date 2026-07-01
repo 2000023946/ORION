@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from src.domain.tool import Tool
 from src.domain.tool_name import ToolName
-from src.domain.tool_response import ToolResponse
+from src.ports.tool_response import ToolResponse
 
 class MCPServerPort(ABC):
     
