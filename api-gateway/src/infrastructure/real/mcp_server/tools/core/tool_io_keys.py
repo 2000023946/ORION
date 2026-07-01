@@ -6,4 +6,4 @@ class ToolIOKeys(Enum):
     WEB_RESULTS = "results"
     DOCUMENTS = "documents"
     METADATA = "metadata"
-    DOCS_IDS = 'docs_ids'
+    DOC_IDS = 'docs_ids'
