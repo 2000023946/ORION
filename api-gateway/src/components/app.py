@@ -1,47 +1,28 @@
+from src.infrastructure.dummy.dummy_mcp_client import DummyMCPClient
+from src.infrastructure.dummy.dummy_mcp_server import DummyMCPServer
+from src.infrastructure.dummy.dummy_graph_executor import DummyGraphExecuter
+
+from src.application.search_use_case import SearchUseCase
 from src.domain.query import Query
-from src.domain.search_answer import SearchAnswer
-
-from src.application.mcp_orchestrator import MCPOrchestrator
-from src.application.graph_executer import GraphExecutor
-
-from src.infrastructure.dummy.dummy_http_port import DummyHttpAdapter
-from src.infrastructure.real.llm.adapter.llm_adapter import LLMAdapter
-from src.infrastructure.real.tools.registry.tool_registry import ToolRegistry
-
-from src.config import config
 
 
 class App:
-
     def __init__(self):
+        # infrastructure layer
+        self.mcp_client = DummyMCPClient()
+        self.mcp_server = DummyMCPServer()
+        self.graph_executor = DummyGraphExecuter()
 
-        # ---------------------------
-        # Infrastructure
-        # ---------------------------
-        self.http = DummyHttpAdapter()
-
-        # ---------------------------
-        # Core ports
-        # ---------------------------
-        self.llm = LLMAdapter(self.http, config)
-        self.tool_registry = ToolRegistry(self.http, config)
-
-        # ---------------------------
-        # Execution engine
-        # ---------------------------
-        self.graph_executor = GraphExecutor(
-            tool_registry=self.tool_registry
-        )
-
-        # ---------------------------
-        # Orchestrator (USE CASE)
-        # ---------------------------
-        self.orchestrator = MCPOrchestrator(
-            llm_port=self.llm,
-            tool_registry_port=self.tool_registry,
+        # application layer (use case)
+        self.search_use_case = SearchUseCase(
+            mcp_client=self.mcp_client,
+            mcp_server=self.mcp_server,
             graph_executor=self.graph_executor
         )
 
-    async def run(self, query_text: str) -> SearchAnswer:
+    async def run(self, query_text: str):
         query = Query(text=query_text)
-        return await self.orchestrator.run(query)
+
+        result = await self.search_use_case.run(query)
+
+        return result

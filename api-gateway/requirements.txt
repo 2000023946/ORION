@@ -1,5 +1,4 @@
-pytest
-pytest-asyncio
-pytest-cov
-python-dotenv
-requests
+# API framework
+fastapi
+uvicorn
+

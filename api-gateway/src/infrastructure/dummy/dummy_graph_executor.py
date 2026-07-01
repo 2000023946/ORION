@@ -1,18 +1,16 @@
-from src.ports.graph_executer import GraphExecutor
+from src.ports.graph_executer_port import GraphExecutorPort
 from src.domain.retrieval_plan import RetrievalPlan
-from src.ports.mcp_server import MCPServer
+from src.ports.mcp_server_port import MCPServerPort
 from src.domain.context import Context
-from src.ports.mcp_server import ToolResponse
+from src.ports.mcp_server_port import ToolResponse
 
 
-class DummyGraphExecuter(GraphExecutor):
+class DummyGraphExecuter(GraphExecutorPort):
 
-    def execute(self, plan: RetrievalPlan, mcp_server: MCPServer) -> Context:
-        context = Context()
+    async def execute(self, plan: RetrievalPlan, mcp_server: MCPServerPort) -> Context:
+        context = Context(context={})
 
-        # pretend execution order = sources first
         to_visit = list(plan.sources)
-
         visited = set()
 
         while to_visit:
@@ -24,12 +22,12 @@ class DummyGraphExecuter(GraphExecutor):
             visited.add(tool_name)
 
             # call tool
-            response: ToolResponse = mcp_server.call_tool(tool_name)
+            response: ToolResponse = await mcp_server.call_tool(tool_name)
 
-            # store in context
-            context.data[tool_name] = response.output
+            # store output in context (FIXED)
+            context.context[tool_name] = response.output
 
-            # add downstream nodes (if they exist in graph)
+            # add downstream nodes
             for neighbor in plan.graph.get(tool_name, []):
                 if neighbor not in visited:
                     to_visit.append(neighbor)
