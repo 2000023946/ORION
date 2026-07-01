@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from src.domain.search_answer import SearchAnswer
 from src.domain.retrieval_plan import RetrievalPlan
 from src.domain.query import Query
 from src.domain.tool import Tool
@@ -11,6 +12,6 @@ class MCPClientPort(ABC):
         pass
     
     @abstractmethod
-    async def answer(self, query: Query, context: Context) -> Context:
+    async def answer(self, query: Query, context: Context) -> SearchAnswer:
         pass   
     

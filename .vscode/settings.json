@@ -1,0 +1,10 @@
+{
+    
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.analysis.extraPaths": [
+        "./api-gateway"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "strict",
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}

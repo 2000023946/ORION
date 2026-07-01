@@ -1,3 +1,4 @@
+from src.domain.tool_name import ToolName
 from src.ports.mcp_client_port import MCPClientPort
 from src.domain.retrieval_plan import RetrievalPlan, ToolEdge
 from src.domain.query import Query
@@ -18,10 +19,10 @@ class DummyMCPClient(MCPClientPort):
         """
 
         edges = [
-            ToolEdge("search_user", "get_orders"),
-            ToolEdge("search_user", "get_profile"),
-            ToolEdge("get_orders", "generate_recommendation"),
-            ToolEdge("get_profile", "generate_recommendation"),
+            ToolEdge(ToolName("search_user"), ToolName("get_orders")),
+            ToolEdge(ToolName("search_user"), ToolName("get_profile")),
+            ToolEdge(ToolName("get_orders"), ToolName("generate_recommendation")),
+            ToolEdge(ToolName("get_profile"), ToolName("generate_recommendation")),
         ]
 
         return RetrievalPlan(edges)
@@ -31,10 +32,11 @@ class DummyMCPClient(MCPClientPort):
         Dummy synthesizer: builds final answer from execution context.
         """
 
-        user = context.get("search_user") or {}
-        orders = context.get("get_orders") or {}
-        profile = context.get("get_profile") or {}
-        rec = context.get("generate_recommendation") or {}
+
+        user = context.get(ToolName("search_user"))
+        orders = context.get(ToolName("get_orders"))
+        profile = context.get(ToolName("get_profile"))
+        rec = context.get(ToolName("generate_recommendation"))
 
         final_answer = (
             f"User {user.get('name')} from {profile.get('location')} "

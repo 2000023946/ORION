@@ -1,6 +1,8 @@
 from collections import defaultdict
+
 from src.domain.tool_edge import ToolEdge
 from src.domain.tool_name import ToolName
+
 
 
 class RetrievalPlan:
@@ -10,6 +12,8 @@ class RetrievalPlan:
         self.sources: list[ToolName] = []
 
         self.generate_graph()
+        
+        
 
     def generate_graph(self) -> dict[ToolName, list[ToolName]]:
         if self.graph:

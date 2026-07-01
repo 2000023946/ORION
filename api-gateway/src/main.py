@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -14,7 +16,7 @@ class SearchRequest(BaseModel):
 
 class SearchResponseModel(BaseModel):
     success: bool
-    answer: dict | None = None
+    answer: dict[str, Any] | None = None
     error: str | None = None
 
 
