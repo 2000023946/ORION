@@ -1,4 +1,3 @@
-from abc import  abstractmethod
 
 from src.domain.tool import Tool
 from src.domain.tool_name import ToolName
@@ -20,6 +19,5 @@ class RealMCPServer(MCPServerPort):
     async def get_tools(self) -> list[Tool]:
         return self.tool_information_registry.get_all_information()
 
-    @abstractmethod
     async def call_tool(self, tool_name: ToolName, tool_request: ToolRequest) -> ToolResponse:
         return await self.tool_registry_port.call_tool(tool_name, tool_request)

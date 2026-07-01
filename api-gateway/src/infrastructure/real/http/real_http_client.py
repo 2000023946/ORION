@@ -7,7 +7,7 @@ from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.http.http_response import HttpResponse
 
 
-class RequestsHttpClient(HttpClientPort):
+class RealHttpClient(HttpClientPort):
     """
     Concrete implementation of HttpClientPort using the synchronous
     'requests' library wrapped for async compatibility.
