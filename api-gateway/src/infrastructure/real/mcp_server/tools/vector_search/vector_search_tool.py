@@ -1,9 +1,9 @@
-
 from src.infrastructure.config.settings import settings
 from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.mcp_server.tools.core.tool_port import ToolPort
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_request import VectorSearchRequest
+from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_result import VectorSearchResult
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.ports.tool_response import ToolResponse
 
@@ -16,14 +16,13 @@ class VectorSearchTool(ToolPort):
     async def execute(self, tool_request: ToolRequest) -> ToolResponse:
 
         # ----------------------------
-        # 1. Build typed request
+        # 1. Parse request
         # ----------------------------
         request = VectorSearchRequest.create(tool_request)
-
         query_text = request.query
 
         # ----------------------------
-        # 2. Embed query
+        # 2. Embed query → vector
         # ----------------------------
         embedding_response = await self.http_client.post(
             url=f"{settings.embedding_api}/embed",
@@ -50,25 +49,24 @@ class VectorSearchTool(ToolPort):
         )
 
         # ----------------------------
-        # 4. Extract results
+        # 4. Convert raw → domain objects
         # ----------------------------
         matches = search_response.require("matches")
-
-        results = [
-            {
-                "id": m["id"],
-                "score": m["score"]
-            }
-            for m in matches
-        ]
+        results = VectorSearchResult.from_raw_list(matches)
 
         # ----------------------------
-        # 5. Return ToolResponse
+        # 5. Return ToolResponse (DAG layer)
         # ----------------------------
         return ToolResponse(
             tool_name=request.tool_name,
             output={
-                ToolIOKeys.DOC_IDS: results
+                ToolIOKeys.DOCS_IDS: [
+                    {
+                        "id": r.doc_id.doc_id,
+                        "score": r.score
+                    }
+                    for r in results
+                ]
             },
             success=True
         )
