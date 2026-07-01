@@ -1,4 +1,3 @@
 class SearchAnswer:
-    def __init__(self, answer: str, sources: list[str] = None):
+    def __init__(self, answer: str):
         self.answer = answer
-        self.sources = sources or []

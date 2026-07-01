@@ -4,7 +4,7 @@ from src.domain.search_answer import SearchAnswer
 from src.application.mcp_orchestrator import MCPOrchestrator
 from src.application.graph_executer import GraphExecutor
 
-from src.infrastructure.real.http.requests_http_adapter import RequestsHttpAdapter
+from src.infrastructure.dummy.dummy_http_port import DummyHttpAdapter
 from src.infrastructure.real.llm.adapter.llm_adapter import LLMAdapter
 from src.infrastructure.real.tools.registry.tool_registry import ToolRegistry
 
@@ -18,7 +18,7 @@ class App:
         # ---------------------------
         # Infrastructure
         # ---------------------------
-        self.http = RequestsHttpAdapter()
+        self.http = DummyHttpAdapter()
 
         # ---------------------------
         # Core ports

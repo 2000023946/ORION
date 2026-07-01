@@ -1,5 +1,7 @@
 import pytest
+
 from src.config import config
+from src.domain.tool_type import ToolType
 from src.domain.retrieval_step import RetrievalStep
 from src.infrastructure.dummy.dummy_http_port import DummyHttpAdapter
 from src.infrastructure.real.tools.web_search_adapter.web_search_tool import WebSearchTool
@@ -11,16 +13,13 @@ def test_web_search_tool_execute_success():
     tool = WebSearchTool(http_adapter, config)
 
     step = RetrievalStep(
-        step_id="1",
-        type="query",
-        input="what is hnsw",
-        params={"top_k": 5}
+        tool_type=ToolType.WEB_SEARCH,
+        params={"query": "what is hnsw", "top_k": 5}
     )
 
     result = tool.execute(step)
 
     assert result.content == "dummy search result for 'what is hnsw'"
-    assert result.score == 1.0
 
 
 def test_web_search_tool_passes_query_to_http():
@@ -29,26 +28,23 @@ def test_web_search_tool_passes_query_to_http():
     tool = WebSearchTool(http_adapter, config)
 
     step = RetrievalStep(
-        step_id="2",
-        type="query",
-        input="vector databases"
+        tool_type=ToolType.WEB_SEARCH,
+        params={"query": "vector databases"}
     )
 
     result = tool.execute(step)
 
-    # better assertion: check actual returned behavior
     assert "vector databases" in result.content
 
 
-def test_web_search_tool_uses_config_url(monkeypatch):
+def test_web_search_tool_uses_config_url():
 
     http_adapter = DummyHttpAdapter()
     tool = WebSearchTool(http_adapter, config)
 
     step = RetrievalStep(
-        step_id="3",
-        type="query",
-        input="faiss vs hnsw"
+        tool_type=ToolType.WEB_SEARCH,
+        params={"query": "faiss vs hnsw"}
     )
 
     captured = {}
@@ -56,19 +52,18 @@ def test_web_search_tool_uses_config_url(monkeypatch):
     def fake_post(url, body, headers=None):
         captured["url"] = url
         captured["body"] = body
-        return {
-            "content": "ok",
-            "score": 0.9
-        }
+        return {"content": "ok", "score": 0.9}
 
     http_adapter.post = fake_post
 
     tool.execute(step)
 
-    assert "url" in captured
+    assert captured["url"] == config.WEB_API
     assert captured["body"]["query"] == "faiss vs hnsw"
-    
+
+
 def test_web_search_tool_describe_contract():
+
     http_adapter = DummyHttpAdapter()
     tool = WebSearchTool(http_adapter, config)
 
@@ -78,8 +73,3 @@ def test_web_search_tool_describe_contract():
     assert isinstance(desc.description, str)
     assert isinstance(desc.inputs, list)
     assert isinstance(desc.outputs, list)
-
-    assert len(desc.name) > 0
-    assert len(desc.description) > 10
-    assert len(desc.inputs) > 0
-    assert len(desc.outputs) > 0

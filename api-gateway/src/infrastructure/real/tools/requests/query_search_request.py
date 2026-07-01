@@ -5,22 +5,16 @@ from src.domain.query import Query
 @dataclass
 class QuerySearchRequest:
     query: Query
-    params: dict = field(default_factory=dict)
 
     @classmethod
     def from_retrieval_step(cls, step: RetrievalStep):
-        if step.type != "query":
-            raise ValueError(
-                f"Expected step type 'query', got '{step.type}'"
-            )
-
+        if 'query' not in step.params:
+            raise ValueError("expected query in params, did not receive!")
         return cls(
-            query=Query(step.input),
-            params=step.params
+            query = Query(step.params['query'])
         )
 
     def to_dict(self):
         return {
             "query": self.query.text,
-            "params": self.params
         }

@@ -6,7 +6,7 @@ from src.infrastructure.real.tools.vector_service.vector_search_tool import (
     VectorSearchTool,
 )
 from src.config import config
-
+from src.domain.tool_type import ToolType
 
 def test_vector_search_tool_execute_success():
 
@@ -38,8 +38,7 @@ def test_vector_search_tool_passes_query_to_http():
     tool = VectorSearchTool(http_adapter, config)
 
     step = RetrievalStep(
-        step_id="2",
-        type="query",
+        type=ToolType.VECTOR_SEARCH,
         input="vector databases"
     )
 
@@ -58,8 +57,7 @@ def test_vector_search_tool_uses_vector_db_url():
     tool = VectorSearchTool(http_adapter, config)
 
     step = RetrievalStep(
-        step_id="3",
-        type="query",
+        type=ToolType.VECTOR_SEARCH,
         input="faiss vs hnsw"
     )
 
