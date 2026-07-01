@@ -1,9 +1,9 @@
+from src.infrastructure.dummy.dummy_graph_executor import DummyGraphExecuter
 from src.infrastructure.dummy.dummy_mcp_client import DummyMCPClient
 from src.infrastructure.dummy.dummy_mcp_server import DummyMCPServer
 
 from src.application.search_use_case import SearchUseCase
 from src.domain.query import Query
-from src.infrastructure.real.graph_executor.real_graph_executor import RealGraphExecuter
 
 
 class App:
@@ -11,7 +11,7 @@ class App:
         # infrastructure layer
         self.mcp_client = DummyMCPClient()
         self.mcp_server = DummyMCPServer()
-        self.graph_executor = RealGraphExecuter()
+        self.graph_executor = DummyGraphExecuter()
 
         # application layer (use case)
         self.search_use_case = SearchUseCase(

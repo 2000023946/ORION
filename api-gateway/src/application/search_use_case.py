@@ -30,7 +30,7 @@ class SearchUseCase:
             plan: RetrievalPlan = await self.mcp_client.create_plan(query, tools)
 
             # 3. execute DAG (PARALLEL + dependency-aware)
-            context: Context = await self.graph_executor.execute(plan, self.mcp_server)
+            context: Context = await self.graph_executor.execute(query, plan, self.mcp_server)
 
             # 4. synthesize final answer
             answer: SearchAnswer = await self.mcp_client.answer(

@@ -1,45 +1,48 @@
 from collections import defaultdict
 
+from src.constants.constants import START_TOOL, END_TOOL
 from src.domain.tool_edge import ToolEdge
 from src.domain.tool_name import ToolName
-
 
 
 class RetrievalPlan:
     def __init__(self, edges: list[ToolEdge]):
         self.edges = edges
+
         self.graph: dict[ToolName, list[ToolName]] = {}
-        self.sources: list[ToolName] = []
+        self.reverse_graph: dict[ToolName, list[ToolName]] = {}
 
         self.generate_graph()
-        
-        
 
     def generate_graph(self) -> dict[ToolName, list[ToolName]]:
         if self.graph:
             return self.graph
 
-        adj_list: dict[ToolName, list[ToolName]] = defaultdict(list)
-        in_degree: dict[ToolName, int] = defaultdict(int)
+        graph: dict[ToolName, list[ToolName]] = defaultdict(list)
+        reverse_graph: dict[ToolName, list[ToolName]] = defaultdict(list)
 
-        # Build graph + in-degree map
+        # Ensure special nodes always exist
+        graph.setdefault(START_TOOL, [])
+        graph.setdefault(END_TOOL, [])
+
+        reverse_graph.setdefault(START_TOOL, [])
+        reverse_graph.setdefault(END_TOOL, [])
+
         for edge in self.edges:
-            src = edge.source
-            dst = edge.to
+            graph[edge.source].append(edge.to)
+            reverse_graph[edge.to].append(edge.source)
 
-            adj_list[src].append(dst)
+            # Ensure every node exists in both graphs
+            graph.setdefault(edge.to, [])
+            reverse_graph.setdefault(edge.source, [])
 
-            # ensure nodes exist in in_degree
-            if dst not in in_degree:
-                in_degree[dst] = 0
-            if src not in in_degree:
-                in_degree[src] = 0
-
-            in_degree[dst] += 1
-
-        self.graph = dict(adj_list)
-
-        # Find source nodes (in-degree = 0)
-        self.sources = [node for node, deg in in_degree.items() if deg == 0]
+        self.graph = dict(graph)
+        self.reverse_graph = dict(reverse_graph)
 
         return self.graph
+
+    def get_children(self, tool: ToolName) -> list[ToolName]:
+        return self.graph.get(tool, [])
+
+    def get_parents(self, tool: ToolName) -> list[ToolName]:
+        return self.reverse_graph.get(tool, [])
