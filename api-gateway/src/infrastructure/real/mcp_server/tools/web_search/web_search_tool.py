@@ -19,16 +19,19 @@ class WebSearchTool(ToolPort):
         # 1. Build typed request
         # ----------------------------
         request = WebSearchRequest.create(tool_request)
-
+        print("making a web search with qeury", request.query.text)
         # ----------------------------
         # 2. Call external API
         # ----------------------------
         raw_response = await self.http_client.post(
-            url=settings.web_api,
+            url=settings.web_api_url,
             json={
-                "query": request.query
+                "api_key": settings.web_api_key,
+                "query": request.query.text,
+                "max_results": 5
             }
         )
+        
 
         # ----------------------------
         # 3. Convert raw API → domain object

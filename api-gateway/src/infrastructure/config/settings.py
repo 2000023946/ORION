@@ -22,8 +22,8 @@ class Settings:
     # ----------------------------
     # Web search API
     # ----------------------------
-    web_api: str = os.getenv("WEB_API", "")
-
+    web_api_key: str = os.getenv("WEB_API_KEY", "")
+    web_api_url: str = os.getenv("WEB_API_URL", "")
     # ----------------------------
     # Embeddings
     # ----------------------------
