@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
+from src.infrastructure.real.http.http_response import HttpResponse
+
 
 class HttpClientPort(ABC):
-
+    
     @abstractmethod
     async def get(
         self,
@@ -11,7 +13,7 @@ class HttpClientPort(ABC):
         headers: Optional[Dict[str, str]] = None,
         params: Optional[Dict[str, Any]] = None,
         timeout: Optional[int] = None,
-    ) -> Any:
+    ) -> HttpResponse:
         """Perform HTTP GET request."""
         pass
 
@@ -23,7 +25,7 @@ class HttpClientPort(ABC):
         json: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         timeout: Optional[int] = None,
-    ) -> Any:
+    ) -> HttpResponse:
         """Perform HTTP POST request."""
         pass
 
@@ -35,7 +37,7 @@ class HttpClientPort(ABC):
         json: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         timeout: Optional[int] = None,
-    ) -> Any:
+    ) -> HttpResponse:
         """Perform HTTP PUT request."""
         pass
 
@@ -45,6 +47,6 @@ class HttpClientPort(ABC):
         url: str,
         headers: Optional[Dict[str, str]] = None,
         timeout: Optional[int] = None,
-    ) -> Any:
+    ) -> HttpResponse:
         """Perform HTTP DELETE request."""
         pass

@@ -1,16 +1,14 @@
-from src.ports.mcp_server_port import MCPServerPort
-from src.domain.tool import Tool
-from src.domain.tool_name import ToolName
-from src.ports.tool_response import ToolResponse
 from typing import Any
-from src.ports.mcp_server_port import MCPServerPort
+
 from src.domain.tool import Tool
 from src.domain.tool_name import ToolName
+from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
+from src.ports.mcp_server_port import MCPServerPort
 from src.ports.tool_response import ToolResponse
 
 
 class DummyMCPServer(MCPServerPort):
-
+    
     async def get_tools(self) -> list[Tool]:
         return [
             Tool(
@@ -39,30 +37,41 @@ class DummyMCPServer(MCPServerPort):
             ),
         ]
 
-    async def call_tool(self, tool_name: ToolName) -> ToolResponse:
+    async def call_tool(self, tool_name: ToolName, tool_request: ToolRequest) -> ToolResponse:
 
+        from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 
-        fake_outputs: dict[str, dict[str, Any]] = {
+        fake_outputs: dict[str, dict[ToolIOKeys, Any]] = {
             "search_user": {
-                "userId": 123,
-                "name": "John"
+                ToolIOKeys.METADATA: {
+                    "userId": 123,
+                    "name": "John"
+                }
             },
             "get_orders": {
-                "orders": [1, 2, 3]
+                ToolIOKeys.METADATA: {
+                    "orders": [1, 2, 3]
+                }
             },
             "get_profile": {
-                "age": 22,
-                "location": "Atlanta"
+                ToolIOKeys.METADATA: {
+                    "age": 22,
+                    "location": "Atlanta"
+                }
             },
             "generate_recommendation": {
-                "recommendation": "Buy more tech stocks"
+                ToolIOKeys.METADATA: {
+                    "recommendation": "Buy more tech stocks"
+                }
             }
         }
 
-        if tool_name in fake_outputs:
+        key = tool_name.name
+    
+        if key in fake_outputs:
             return ToolResponse(
                 tool_name=tool_name,
-                output=fake_outputs[tool_name.name],
+                output=fake_outputs[key],
                 success=True
             )
 

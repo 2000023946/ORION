@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from src.infrastructure.real.mcp_client.llm.http_client_port import HttpClientPort
+from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.mcp_client.llm.llm_port import LLMPort
 from src.infrastructure.real.mcp_client.llm.llm_response import LLMResponse
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
@@ -37,7 +37,9 @@ class LLM(LLMPort):
             )
 
             # OpenAI-style response parsing
-            raw_text = response["choices"][0]["message"]["content"]
+            data = response.to_dict()
+
+            raw_text = data["choices"][0]["message"]["content"]
 
             return LLMResponse(raw=raw_text)
 

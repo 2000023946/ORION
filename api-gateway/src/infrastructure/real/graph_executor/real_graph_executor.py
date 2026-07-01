@@ -7,7 +7,7 @@ from src.domain.context import Context
 from src.domain.query import Query
 from src.domain.retrieval_plan import RetrievalPlan
 from src.domain.tool_name import ToolName
-from src.infrastructure.real.mcp_server.tools.core.tool_inputs import ToolInputs
+from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.infrastructure.real.mcp_server.tools.core.tool_output_registry import ToolOutputRegistry
 from src.infrastructure.real.mcp_server.tools.core.tool_request_factory_registry import ToolRequestFactoryRegistry
 from src.ports.graph_executer_port import GraphExecutorPort
@@ -89,7 +89,7 @@ class RealGraphExecuter(GraphExecutorPort):
         # ----------------------------
         if tool_name == START_TOOL:
             # seed context + registry
-            context.update(START_TOOL, tool_output_registry.get(ToolInputs.query))
+            context.update(START_TOOL, tool_output_registry.get(ToolIOKeys.QUERY))
             return
 
         # ----------------------------
