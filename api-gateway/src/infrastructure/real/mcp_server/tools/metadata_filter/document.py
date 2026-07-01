@@ -7,6 +7,7 @@ class Document:
     doc_id: str
     title: str
     content: str
+    price: str
     metadata: dict[str, Any]
 
     @classmethod
@@ -15,6 +16,7 @@ class Document:
             doc_id=raw["id"],
             title=raw.get("title", ""),
             content=raw.get("content", ""),
+            price=raw.get('price', ""),
             metadata=raw.get("metadata", {})
         )
 
