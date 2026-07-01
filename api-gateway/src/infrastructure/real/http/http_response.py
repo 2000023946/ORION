@@ -6,15 +6,17 @@ from typing import Any, Dict
 class HttpResponse:
     status_code: int
     headers: Dict[str, Any]
-    body: Any
+    body: Dict[str, Any]
 
     def get(self, key: str, default: Any = None) -> Any:
-        return getattr(self, key, default)
+        return self.body.get(key, default)
 
     def require(self, key: str) -> Any:
-        if not hasattr(self, key):
+        print(self.body)
+        if key not in self.body:
+            print("missing key", key)
             raise KeyError(f"Missing required key: {key}")
-        return getattr(self, key)
+        return self.body[key]
 
     def to_dict(self) -> dict[str, Any]:
         return {

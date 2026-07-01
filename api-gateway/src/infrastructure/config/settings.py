@@ -47,8 +47,14 @@ class Settings:
     metadata_db_type: str = os.getenv("METADATA_DB_TYPE", "mongo")  # mongo | elastic | postgres
 
     metadata_db_api_key: str = os.getenv("METADATA_DB_API_KEY", "")
-    metadata_db_url: str = os.getenv("METADATA_DB_URL", "")
+
+    metadata_db_url: str = os.getenv("METADATA_DB_URL", "mongodb://localhost:27017")
+
     metadata_db_index: str = os.getenv("METADATA_DB_INDEX", "documents")
+
+    metadata_db_name: str = os.getenv("METADATA_DB_NAME", "mcp_db")
+
+    metadata_collection_name: str = os.getenv("METADATA_COLLECTION_NAME", "products")
 
     metadata_batch_size: int = int(os.getenv("METADATA_BATCH_SIZE", "10"))
 

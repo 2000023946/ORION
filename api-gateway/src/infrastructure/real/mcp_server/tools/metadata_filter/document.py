@@ -13,7 +13,7 @@ class Document:
     @classmethod
     def from_raw(cls, raw: dict[str, Any]) -> "Document":
         return cls(
-            doc_id=raw["id"],
+            doc_id=raw["_id"],
             title=raw.get("title", ""),
             content=raw.get("content", ""),
             price=raw.get('price', ""),

@@ -4,6 +4,7 @@ from src.infrastructure.real.mcp_server.tools.core.tool_port import ToolPort
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 
+from src.infrastructure.real.mcp_server.tools.metadata_filter.metadata_filter_request import MetadataFilterRequest
 from src.infrastructure.real.mcp_server.tools.metadata_filter.metadata_response import MetadataResponse
 from src.ports.tool_response import ToolResponse
 
@@ -18,18 +19,7 @@ class MetadataFilterTool(ToolPort):
         # ----------------------------
         # 1. Extract input (doc ids from vector search)
         # ----------------------------
-        doc_ids = tool_request.params.get(ToolIOKeys.DOCS_IDS)
-
-        if not doc_ids:
-            return ToolResponse(
-                tool_name=tool_request.tool_name,
-                output={ToolIOKeys.DOCUMENTS: []},
-                success=False,
-                error="No document ids provided"
-            )
-
-        # extract only ids
-        ids = [d["id"] for d in doc_ids]
+        filter_request = MetadataFilterRequest.create(tool_request)
 
         # ----------------------------
         # 2. Query metadata DB
@@ -39,7 +29,7 @@ class MetadataFilterTool(ToolPort):
             json={
                 "index": settings.metadata_db_index,
                 "filter": {
-                    "id": {"$in": ids}
+                    "_id": {"$in": filter_request.serialize_ids()}
                 }
             },
             timeout=settings.http_timeout
