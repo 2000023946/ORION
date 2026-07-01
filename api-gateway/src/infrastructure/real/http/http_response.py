@@ -1,18 +1,24 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Dict
 
 
 @dataclass
 class HttpResponse:
-    _data: dict[str, Any]
+    status_code: int
+    headers: Dict[str, Any]
+    body: Any
 
     def get(self, key: str, default: Any = None) -> Any:
-        return self._data.get(key, default)
+        return getattr(self, key, default)
 
     def require(self, key: str) -> Any:
-        if key not in self._data:
+        if not hasattr(self, key):
             raise KeyError(f"Missing required key: {key}")
-        return self._data[key]
+        return getattr(self, key)
 
     def to_dict(self) -> dict[str, Any]:
-        return self._data
+        return {
+            "status_code": self.status_code,
+            "headers": self.headers,
+            "body": self.body,
+        }
