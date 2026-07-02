@@ -3,6 +3,20 @@
 
 # 🚀 Orion: MCP-Orchestrated Cloud-Native Distributed Vector Search Engine
 
+## ⚙️ Running the System
+
+👉 **All setup, execution commands, and local testing instructions are located in the `api-gateway/README.md`.**
+
+This includes:
+
+* Environment setup (venv, dependencies)
+* MongoDB / vector DB setup
+* Running MCP server + client
+* Running full system tests (`test.app.py`, `test.tool.*`)
+* API startup scripts (`run_api.sh`, `test_api.sh`)
+
+---
+
 ## 📌 Project Overview
 
 Orion is a cloud-native, multi-region distributed retrieval system designed around an MCP (Model Context Protocol) orchestration layer. Instead of relying on a fixed search pipeline, Orion dynamically selects and coordinates multiple retrieval tools based on query intent, enabling flexible, intelligent, and scalable search behavior across heterogeneous data sources.
