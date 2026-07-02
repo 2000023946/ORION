@@ -50,10 +50,12 @@ class MongoHttpClient(HttpClientPort):
         # ----------------------------
         if "/query" in url:
             collection_name = settings.metadata_collection_name
+            
             filter_query = json.get("filter", {})
-
+            
 
             collection = self.db[collection_name]
+
             results = list(collection.find(filter_query))
 
             return HttpResponse(

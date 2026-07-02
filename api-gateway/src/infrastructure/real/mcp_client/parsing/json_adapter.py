@@ -8,3 +8,4 @@ class JsonAdapter(JsonPort):
     def to_json(self, data: str) -> Dict[str, Any]:
         """Convert object to JSON-serializable dictionary."""
         return json.loads(data)
+    

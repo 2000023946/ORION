@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 
 @dataclass
 class HttpResponse:
     status_code: int
-    headers: Dict[str, Any]
-    body: Dict[str, Any]
+    headers: dict[str, Any]
+    body: Any
 
     def get(self, key: str, default: Any = None) -> Any:
         return self.body.get(key, default)

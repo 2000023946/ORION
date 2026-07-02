@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from infrastructure.real.mcp_client.llm.llm_response import LLMResponse
-from infrastructure.real.mcp_client.planning.prompt import Prompt
+from src.infrastructure.real.mcp_client.planning.prompt import Prompt
+from src.infrastructure.real.mcp_client.llm.llm_response import LLMResponse
 
 
 

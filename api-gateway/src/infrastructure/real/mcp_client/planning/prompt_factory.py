@@ -1,5 +1,5 @@
-from infrastructure.real.mcp_client.planning.create_plan_instruction import CREATE_PLAN_INSTRUCTION
-from infrastructure.real.mcp_client.planning.prompt import Prompt
+from src.infrastructure.real.mcp_client.planning.create_plan_instruction import CREATE_PLAN_INSTRUCTION
+from src.infrastructure.real.mcp_client.planning.prompt import Prompt
 from src.domain.context import Context
 from src.domain.query import Query
 from src.domain.tool import Tool

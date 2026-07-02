@@ -3,13 +3,15 @@ from typing import Dict, Any
 from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.mcp_client.llm.llm_port import LLMPort
 from src.infrastructure.real.mcp_client.llm.llm_response import LLMResponse
+from src.infrastructure.real.mcp_client.parsing.json_adapter import JsonAdapter
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
 from src.infrastructure.config.settings import settings
 
 
 class LLM(LLMPort):
-    def __init__(self, http_client: HttpClientPort):
+    def __init__(self, http_client: HttpClientPort, json_parser: JsonAdapter):
         self.http_client = http_client
+        self.json_parser = json_parser
 
     async def generate(self, prompt: Prompt) -> LLMResponse:
         try:
@@ -21,7 +23,8 @@ class LLM(LLMPort):
                         "content": prompt.prompt
                     }
                 ],
-                "temperature": 0.2
+                "temperature": 0.2,
+                "max_tokens": settings.llm_max_tokens
             }
 
             headers = {
@@ -35,13 +38,10 @@ class LLM(LLMPort):
                 headers=headers,
                 timeout=settings.http_timeout
             )
+            
 
             # OpenAI-style response parsing
-            data = response.to_dict()
-
-            raw_text = data["choices"][0]["message"]["content"]
-
-            return LLMResponse(raw=raw_text)
+            return LLMResponse.create(response, self.json_parser)
 
         except Exception as e:
             return LLMResponse(

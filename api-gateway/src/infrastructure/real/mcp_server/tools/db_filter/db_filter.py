@@ -17,8 +17,8 @@ class DBFilter:
 
         name = raw.get("name", None)
 
-        min_price = raw.get("min", None)
-        max_price = raw.get("max", None)
+        min_price = raw.get("min_price", None)
+        max_price = raw.get("max_price", None)
 
         return cls(
             name=name,
@@ -27,11 +27,29 @@ class DBFilter:
         )
         
     def get_db_query(self) -> dict[str, Any]:
-        db_query_payload: dict[str, Any] = {
-            "name": self.name,
-            "min_price": self.min_price,
-            "max_price": self.max_price
-        }
-        db_query_payload = {k: v for k, v in db_query_payload.items() if v is not None}
-        
-        return db_query_payload
+        query: dict[str, Any] = {}
+
+        # -----------------------
+        # NAME (case-insensitive contains)
+        # -----------------------
+        if self.name:
+            query["name"] = {
+                "$regex": self.name,
+                "$options": "i"  # case-insensitive
+            }
+
+        # -----------------------
+        # PRICE RANGE
+        # -----------------------
+        price_filter: dict[str, Any] = {}
+
+        if self.min_price is not None:
+            price_filter["$gte"] = self.min_price
+
+        if self.max_price is not None:
+            price_filter["$lte"] = self.max_price
+
+        if price_filter:
+            query["price"] = price_filter
+
+        return query
