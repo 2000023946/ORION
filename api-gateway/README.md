@@ -5,14 +5,14 @@
 
 ## Overview
 
-This project implements a **dynamic retrieval pipeline using MCP (Model Context Protocol)** where an LLM does not directly answer questions, but instead:
+This project implements a **dynamic retrieval pipeline using MCP (Model Context Protocol)** where an LLM does not directly answer questions. Instead, it:
 
 1. **Plans execution (DAG generation)**
 2. **Executes tools via MCP server**
 3. **Builds context from tool outputs**
 4. **Generates final answer using LLM with retrieved context**
 
-This allows **adaptive multi-tool reasoning instead of fixed pipelines**.
+This enables **adaptive multi-tool reasoning instead of fixed pipelines**.
 
 ---
 
@@ -53,9 +53,11 @@ Responsible for:
 * Converting user query → execution DAG
 * Generating final answer from context
 
-Files:
+Path:
 
-* `src/infrastructure/real/mcp_client/`
+```
+src/infrastructure/real/mcp_client/
+```
 
 ---
 
@@ -67,9 +69,11 @@ Responsible for:
 * Executing tools via `call_tool`
 * Returning structured outputs
 
-Files:
+Path:
 
-* `src/infrastructure/real/mcp_server/`
+```
+src/infrastructure/real/mcp_server/
+```
 
 ---
 
@@ -84,7 +88,9 @@ Responsible for:
 
 File:
 
-* `src/infrastructure/real/graph_executor/real_graph_executor.py`
+```
+src/infrastructure/real/graph_executor/real_graph_executor.py
+```
 
 ---
 
@@ -92,29 +98,29 @@ File:
 
 You currently support 4 tools:
 
-* **VECTOR_SEARCH_TOOL**
+#### VECTOR_SEARCH_TOOL
 
-  * Input: query
-  * Output: doc_ids
-  * Semantic search over embeddings
+* Input: query
+* Output: doc_ids
+* Semantic search over embeddings
 
-* **WEB_SEARCH_TOOL**
+#### WEB_SEARCH_TOOL
 
-  * Input: query
-  * Output: web results
-  * Live external search
+* Input: query
+* Output: web results
+* Live external search
 
-* **DB_FILTER_TOOL**
+#### DB_FILTER_TOOL
 
-  * Input: query
-  * Output: filtered documents
-  * Structured filtering (name + price)
+* Input: query
+* Output: filtered documents
+* Structured filtering (name + price)
 
-* **METADATA_FILTER_TOOL**
+#### METADATA_FILTER_TOOL
 
-  * Input: doc_ids
-  * Output: documents
-  * Filters vector search results using metadata constraints
+* Input: doc_ids
+* Output: documents
+* Filters vector search results using metadata constraints
 
 ---
 
@@ -143,10 +149,10 @@ The LLM generates a DAG like:
 
 The executor:
 
-* Runs all tools at same depth in parallel
+* Runs all tools at the same depth in parallel
 * Passes outputs via registry
 * Resolves dependencies using edges
-* Stops at END node
+* Stops at `END` node
 
 ---
 
@@ -158,7 +164,7 @@ All tool outputs are stored in:
 Context
 ```
 
-Example:
+Examples:
 
 * vector search → doc_ids
 * metadata filter → documents
@@ -176,15 +182,15 @@ Query + Context → LLM → Final Answer
 
 ---
 
-## Important Rules in System
+## Important Rules
 
 ### DAG Rules
 
 * Must be **acyclic**
 * Must follow **strict IO matching**
 * No hallucinated tool dependencies
-* START = query input
-* END = completion
+* `START` = query input
+* `END` = completion
 
 ---
 
@@ -192,9 +198,9 @@ Query + Context → LLM → Final Answer
 
 * Tools only run if required inputs exist
 * No tool can "guess" missing inputs
-* Metadata filter requires doc_ids
-* DB filter requires query
-* Vector search always produces doc_ids
+* Metadata filter requires `doc_ids`
+* DB filter requires `query`
+* Vector search always produces `doc_ids`
 
 ---
 
@@ -203,7 +209,9 @@ Query + Context → LLM → Final Answer
 ### Requirements
 
 * Python 3.10+
-* Docker Daemon & Docker terminal or MongoDB (Need for DB to have running mongoDB running)
+* Docker (optional depending on tool backend)
+* MongoDB (required for metadata filtering if enabled)
+* API keys (LLM / external tools depending on config)
 
 ---
 
@@ -217,63 +225,137 @@ pip install -r requirements.txt
 
 ---
 
-### Run Tests
+## Testing Strategy
 
-Each component has isolated tests:
+This project separates tests into **unit tests** and **integrated/system tests**.
 
-#### Tool Tests
+---
+
+# Unit Tests (No external dependencies)
+
+Location:
+
+```
+tests/unit/
+```
+
+### Purpose
+
+* Pure logic validation
+* Domain + application + infrastructure contracts
+* Fully isolated (no API keys required)
+
+### Run unit tests
+
+Use scripts:
 
 ```bash
-python test.tool.vector_search.py
-python test.tool.web_search.py
-python test.tool.db_filter.py
-python test.tool.metadata_filter.py
+./scripts/run_test.sh
+```
+
+or directly:
+
+```bash
+pytest tests/unit
 ```
 
 ---
 
-#### MCP Client Test
+## Integrated Tests (Require environment setup)
+
+Location:
+
+```
+tests/integrated/
+```
+
+### Purpose
+
+These tests:
+
+* Require API keys and environment setup
+* Call real MCP server/client flow
+* Execute real tools in isolation
+* Validate system wiring end-to-end behavior
+
+### Examples:
+
+* MCP client → server communication
+* Individual tool execution (vector, web, db, metadata)
+* Full system flow test
+
+---
+
+### Run integrated tests
+
+Make sure environment variables are set first:
 
 ```bash
-python test.mcp_client.py
+export WEB_API_KEY=...
+export LLM_API_KEY=...
+```
+
+Then run:
+
+```bash
+./scripts/test_api.sh
+```
+
+or manually:
+
+```bash
+pytest tests/integrated
 ```
 
 ---
 
-#### MCP Server Test
+## Scripts
+
+All execution helpers are in:
+
+```
+scripts/
+```
+
+### Available scripts
+
+#### Run API
 
 ```bash
-python test.mcp_server.py
+./scripts/run_api.sh
+```
+
+#### Run unit tests
+
+```bash
+./scripts/run_test.sh
+```
+
+#### Run integrated/system tests
+
+```bash
+./scripts/test_api.sh
 ```
 
 ---
 
-#### Full System Test
+## Full System Test
 
-```bash
-python test.app.py
+You can run an end-to-end validation:
+
+```
+tests/integrated/test.app.py
+```
+
+This simulates:
+
+```
+Query → Planner → DAG → Execution → Tools → Context → Final Answer
 ```
 
 ---
 
-## Run API
-
-```bash
-./run_api.sh
-```
-
----
-
-## TEST API
-
-```bash
-./test_api.sh
-```
-
----
-
-
-Example:
+## Example Flow
 
 ```
 Query: iphones with good battery life
@@ -299,12 +381,12 @@ LLM → Final Answer
                        ↓
             ┌─────────────────────┐
             │   MCP Client LLM    │
-            │ (DAG Planner)       │
+            │   (DAG Planner)     │
             └────────┬────────────┘
                      ↓
             ┌─────────────────────┐
             │  Graph Executor     │
-            │ (DAG Runtime)       │
+            │   (DAG Runtime)     │
             └────────┬────────────┘
                      ↓
         ┌──────────────────────────────┐

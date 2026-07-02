@@ -1,9 +1,10 @@
 from src.infrastructure.real.mcp_client.parsing.json_port import JsonPort
 from src.domain.tool_edge import ToolEdge
 from src.domain.tool_name import ToolName
+from src.infrastructure.real.mcp_client.parsing.retrieval_plan_parser_port import RetrievalPlanParserPort
 
 
-class RetrievalPlanParser:
+class RetrievalPlanParser(RetrievalPlanParserPort):
 
     def __init__(self, json: JsonPort):
         self.json = json

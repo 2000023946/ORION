@@ -4,9 +4,10 @@ from src.domain.context import Context
 from src.domain.query import Query
 from src.domain.tool import Tool
 from src.infrastructure.real.mcp_client.planning.answer_instruction import ANSWER_INSTRUCTION
+from src.infrastructure.real.mcp_client.planning.prompt_factory_port import PromptFactoryPort
 from src.infrastructure.real.mcp_server.tools.db_filter.db_filter_instruction import DB_FILTER_INSTRUCTION
 
-class PromptFactory:
+class PromptFactory(PromptFactoryPort):
     
     
     def create_plan_prompt(self, query: Query, tools: list[Tool]) -> Prompt:

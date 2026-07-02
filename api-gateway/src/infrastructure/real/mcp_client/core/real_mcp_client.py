@@ -1,13 +1,13 @@
 from src.domain.search_answer import SearchAnswer
 from src.infrastructure.real.mcp_client.llm.llm_port import LLMPort
 from src.infrastructure.real.mcp_client.llm.llm_response import LLMResponse
-from src.infrastructure.real.mcp_client.parsing.retrieval_plan_parser import RetrievalPlanParser
+from src.infrastructure.real.mcp_client.parsing.retrieval_plan_parser_port import RetrievalPlanParserPort
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
-from src.infrastructure.real.mcp_client.planning.prompt_factory import PromptFactory
 from src.domain.retrieval_plan import RetrievalPlan
 from src.domain.query import Query
 from src.domain.tool import Tool
 from src.domain.context import Context
+from src.infrastructure.real.mcp_client.planning.prompt_factory_port import PromptFactoryPort
 from src.ports.mcp_client_port import MCPClientPort
 
 from src.domain.tool_edge import ToolEdge
@@ -17,8 +17,8 @@ class RealMCPClient(MCPClientPort):
     def __init__(
             self, 
             llm: LLMPort, 
-            prompt_factory: PromptFactory, 
-            plan_parser: RetrievalPlanParser
+            prompt_factory: PromptFactoryPort, 
+            plan_parser: RetrievalPlanParserPort
         ):
         self.llm = llm
         self.prompt_factory = prompt_factory

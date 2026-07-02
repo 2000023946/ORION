@@ -8,3 +8,8 @@ pymongo
 
 sentence-transformers
 faiss-cpu
+
+
+pytest
+
+pytest-asyncio

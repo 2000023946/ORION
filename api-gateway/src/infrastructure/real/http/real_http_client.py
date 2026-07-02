@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, Dict, Optional
 
-import requests
+import requests # type: ignore
 
 from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.http.http_response import HttpResponse

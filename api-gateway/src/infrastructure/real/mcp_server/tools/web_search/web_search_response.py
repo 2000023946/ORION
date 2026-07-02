@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 import json
 
 from src.infrastructure.real.http.http_response import HttpResponse
@@ -17,8 +17,14 @@ class WebSearchResponse:
         """
         Convert raw web API JSON → structured domain object.
         """
+        
+        raw = response.body
+        
+        if isinstance(raw, str):
+            data: dict[str, Any] = json.loads(raw)
+        else:
+            data: dict[str, Any] = raw or {}
 
-        data = json.loads(response.body)
 
         results = [
             WebSearchResult(
