@@ -1,8 +1,7 @@
 import asyncio
 from collections import deque
 
-
-from src.constants.constants import START_TOOL
+from src.constants.constants import START_TOOL, END_TOOL
 from src.domain.context import Context
 from src.domain.query import Query
 from src.domain.retrieval_plan import RetrievalPlan
@@ -16,31 +15,35 @@ from src.ports.tool_response import ToolResponse
 
 
 class RealGraphExecuter(GraphExecutorPort):
-    
+
     def __init__(self, tool_request_factory_registry: ToolRequestFactoryRegistry):
         self.tool_request_factory_registry = tool_request_factory_registry
 
-    async def execute(self, query: Query, plan: RetrievalPlan, mcp_server: MCPServerPort) -> Context:
-        context = Context()
+    async def execute(
+        self,
+        query: Query,
+        plan: RetrievalPlan,
+        mcp_server: MCPServerPort
+    ) -> Context:
 
+        context: Context = Context()
         graph = plan.graph
+
         visited: set[ToolName] = set()
 
-        # FIX: correct deque init
-        queue = deque([START_TOOL])
+        queue: deque[ToolName] = deque([START_TOOL])
 
-        # registry holds all tool outputs
-        tool_output_registry = ToolOutputRegistry(query=query)  # START will seed it below
+        tool_output_registry = ToolOutputRegistry(query=query)
 
         while queue:
 
             layer: list[ToolName] = []
 
             # ----------------------------
-            # 1. build current layer
+            # Build current BFS layer
             # ----------------------------
             for _ in range(len(queue)):
-                node = queue.popleft()
+                node: ToolName = queue.popleft()
 
                 if node in visited:
                     continue
@@ -49,22 +52,28 @@ class RealGraphExecuter(GraphExecutorPort):
                 layer.append(node)
 
             # ----------------------------
-            # 2. execute layer in parallel
+            # Execute layer in parallel
             # ----------------------------
-            await asyncio.gather(
+            results = await asyncio.gather(
                 *[
                     self._run_node(
                         tool_name=node,
                         mcp_server=mcp_server,
                         context=context,
-                        tool_output_registry=tool_output_registry
+                        tool_output_registry=tool_output_registry,
                     )
                     for node in layer
                 ]
             )
 
             # ----------------------------
-            # 3. enqueue children
+            # IMPORTANT: STOP IF END WAS HIT
+            # ----------------------------
+            if any(result is True for result in results):
+                break
+
+            # ----------------------------
+            # Enqueue children
             # ----------------------------
             for node in layer:
                 for neighbor in graph.get(node, []):
@@ -74,7 +83,7 @@ class RealGraphExecuter(GraphExecutorPort):
         return context
 
     # -------------------------------------------------
-    # CORE NODE EXECUTION FLOW (YOUR REQUIRED ALGORITHM)
+    # NODE EXECUTION
     # -------------------------------------------------
     async def _run_node(
         self,
@@ -82,52 +91,58 @@ class RealGraphExecuter(GraphExecutorPort):
         mcp_server: MCPServerPort,
         context: Context,
         tool_output_registry: ToolOutputRegistry
-    ) -> None:
+    ) -> bool:
+        """
+        Returns:
+        - True  → execution should STOP (END reached)
+        - False → continue execution
+        """
 
         # ----------------------------
-        # 0. START NODE SPECIAL CASE
+        # START NODE
         # ----------------------------
         if tool_name == START_TOOL:
-            # seed context + registry
-            context.update(START_TOOL, tool_output_registry.get(ToolIOKeys.QUERY))
-            return
+            context.update(
+                START_TOOL,
+                tool_output_registry.get(ToolIOKeys.QUERY)
+            )
+            return False
 
         # ----------------------------
-        # 1. CREATE TOOL REQUEST (from registry)
+        # END NODE (TERMINATION SIGNAL)
         # ----------------------------
-        factory_registry = self.tool_request_factory_registry
+        if tool_name == END_TOOL:
+            return True  # <-- THIS STOPS THE ENTIRE GRAPH
 
-        tool_request = factory_registry.create_request(
+        # ----------------------------
+        # CREATE TOOL REQUEST
+        # ----------------------------
+        tool_request = self.tool_request_factory_registry.create_request(
             tool_name=tool_name,
             tool_output_registry=tool_output_registry
         )
 
-        # ----------------------------
-        # 2. BUILD TOOL RESPONSE (pre-execution object)
-        # ----------------------------
-        tool_response = ToolResponse(
-            tool_name=tool_name,
-            output={},
-            success=True
-        )
+        tool_response: ToolResponse
 
         try:
-            # ----------------------------
-            # 3. EXECUTE TOOL
-            # ----------------------------
             tool_response = await mcp_server.call_tool(tool_name, tool_request)
 
-
         except Exception as e:
-            tool_response.success = False
-            tool_response.error = str(e)
+            tool_response = ToolResponse(
+                tool_name=tool_name,
+                output={},
+                success=False,
+                error=str(e),
+            )
 
         # ----------------------------
-        # 4. SAVE INTO REGISTRY (IMPORTANT STEP)
+        # SAVE OUTPUT
         # ----------------------------
         tool_output_registry.save_response(tool_response)
 
         # ----------------------------
-        # 5. UPDATE GLOBAL CONTEXT
+        # UPDATE CONTEXT
         # ----------------------------
         context.update(tool_name, tool_response.output)
+
+        return False

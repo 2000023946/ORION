@@ -11,10 +11,11 @@ from src.infrastructure.real.mcp_client.planning.prompt_factory import PromptFac
 class MCPClientInfrastructure:
     def __init__(self):
         self.http_client: HttpClientPort = RealHttpClient()
-        self.llm: LLMPort = LLM(http_client=self.http_client)
+        self.json_parser: JsonAdapter = JsonAdapter()
+        self.llm: LLMPort = LLM(http_client=self.http_client, json_parser=self.json_parser)
         self.prompt_factory: PromptFactory = PromptFactory()
         
-        self.json_parser: JsonAdapter = JsonAdapter()
+        
         self.plan_parser = RetrievalPlanParser(json=self.json_parser)
         self.mcp_client = RealMCPClient(
             llm=self.llm,

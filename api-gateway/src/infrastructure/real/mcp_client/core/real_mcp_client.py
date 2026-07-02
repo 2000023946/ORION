@@ -27,7 +27,7 @@ class RealMCPClient(MCPClientPort):
     async def create_plan(self, query: Query, tools: list[Tool]) -> RetrievalPlan:
         prompt: Prompt = self.prompt_factory.create_plan_prompt(query, tools)
         llm_output: LLMResponse = await self.llm.generate(prompt)
-        
+        print("llm_output", llm_output)
         json_output = llm_output.get_response()
         
         tool_edges: list[ToolEdge] = self.plan_parser.parse(json_output)

@@ -8,11 +8,8 @@ from src.infrastructure.real.mcp_server.tools.db_filter.db_filter_instruction im
 
 class PromptFactory:
     
-    def get_tool_names(self, tools: list[Tool]) -> list[str]:
-        return [t.name.name for t in tools]
     
     def create_plan_prompt(self, query: Query, tools: list[Tool]) -> Prompt:
-        tool_names = self.get_tool_names(tools)
 
         prompt_text = f"""
             {CREATE_PLAN_INSTRUCTION}
@@ -21,11 +18,10 @@ class PromptFactory:
             {query.text}
 
             AVAILABLE TOOLS:
-            {tool_names}
+            {tools}
 
             Return ONLY JSON.
         """
-
         return Prompt(prompt=prompt_text)
     
     def create_answer_prompt(self, query: Query, context: Context) -> Prompt:

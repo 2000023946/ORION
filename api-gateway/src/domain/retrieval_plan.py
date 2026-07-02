@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from src.constants.constants import START_TOOL, END_TOOL
 from src.domain.tool_edge import ToolEdge
@@ -46,3 +46,27 @@ class RetrievalPlan:
 
     def get_parents(self, tool: ToolName) -> list[ToolName]:
         return self.reverse_graph.get(tool, [])
+    
+    def bfs(self) -> list[ToolName]:
+        """
+        Breadth-first traversal starting from START.
+        """
+        visited: set[ToolName] = set()
+        queue = deque([START_TOOL])
+
+        order: list[ToolName] = []
+
+        while queue:
+            node = queue.popleft()
+
+            if node in visited:
+                continue
+
+            visited.add(node)
+            order.append(node)
+
+            for child in self.get_children(node):
+                if child not in visited:
+                    queue.append(child)
+
+        return order

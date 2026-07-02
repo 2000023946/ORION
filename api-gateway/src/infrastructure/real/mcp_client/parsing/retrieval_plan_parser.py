@@ -1,4 +1,4 @@
-from infrastructure.real.mcp_client.parsing.json_port import JsonPort
+from src.infrastructure.real.mcp_client.parsing.json_port import JsonPort
 from src.domain.tool_edge import ToolEdge
 from src.domain.tool_name import ToolName
 
