@@ -107,3 +107,22 @@ def test_empty_edges():
     assert plan.get_children(END_TOOL) == []
 
     assert plan.bfs() == [START_TOOL]
+    
+def test_retrieval_plan_str():
+    a = ToolName("A")
+    b = ToolName("B")
+
+    edges = [
+        ToolEdge(START_TOOL, a),
+        ToolEdge(a, b),
+        ToolEdge(b, END_TOOL),
+    ]
+
+    plan = RetrievalPlan(edges)
+
+    plan_str = str(plan)
+
+    assert "RetrievalPlan DAG" in plan_str
+    assert f"{START_TOOL} -> {a}" in plan_str
+    assert f"{a} -> {b}" in plan_str
+    assert f"{b} -> {END_TOOL}" in plan_str

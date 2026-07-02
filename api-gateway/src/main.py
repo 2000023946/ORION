@@ -18,6 +18,7 @@ class SearchResponseModel(BaseModel):
     success: bool
     answer: dict[str, Any] | None = None
     error: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 # -------------------------
@@ -38,9 +39,12 @@ system = App()
 async def search(req: SearchRequest):
     
     result = await system.run(req.query)
-    print('res', result)
     return SearchResponseModel(
         success=result.success,
         answer=result.answer.to_dict() if result.answer else None,
-        error=result.error
+        error=result.error,
+        metadata=result.metadata
     )
+
+    
+    

@@ -54,7 +54,7 @@ class RealGraphExecuter(GraphExecutorPort):
             # ----------------------------
             # Execute layer in parallel
             # ----------------------------
-            results = await asyncio.gather(
+            await asyncio.gather(
                 *[
                     self._run_node(
                         tool_name=node,
@@ -66,11 +66,7 @@ class RealGraphExecuter(GraphExecutorPort):
                 ]
             )
 
-            # ----------------------------
-            # IMPORTANT: STOP IF END WAS HIT
-            # ----------------------------
-            if any(result is True for result in results):
-                break
+
 
             # ----------------------------
             # Enqueue children
@@ -90,43 +86,30 @@ class RealGraphExecuter(GraphExecutorPort):
         tool_name: ToolName,
         mcp_server: MCPServerPort,
         context: Context,
-        tool_output_registry: ToolOutputRegistry
-    ) -> bool:
-        """
-        Returns:
-        - True  → execution should STOP (END reached)
-        - False → continue execution
-        """
-
-        # ----------------------------
-        # START NODE
-        # ----------------------------
+        tool_output_registry: ToolOutputRegistry,
+    ) -> None:
+        print(f"Executing Node {tool_name.name}")
+        # START node
         if tool_name == START_TOOL:
             context.update(
                 START_TOOL,
-                tool_output_registry.get(ToolIOKeys.QUERY)
+                tool_output_registry.get(ToolIOKeys.QUERY),
             )
-            return False
+            return
 
-        # ----------------------------
-        # END NODE (TERMINATION SIGNAL)
-        # ----------------------------
+        # END node
         if tool_name == END_TOOL:
-            return True  # <-- THIS STOPS THE ENTIRE GRAPH
+            return
 
-        # ----------------------------
-        # CREATE TOOL REQUEST
-        # ----------------------------
+        # Create request
         tool_request = self.tool_request_factory_registry.create_request(
             tool_name=tool_name,
-            tool_output_registry=tool_output_registry
+            tool_output_registry=tool_output_registry,
         )
-
-        tool_response: ToolResponse
-
+        print("tool request", tool_request.params)
         try:
             tool_response = await mcp_server.call_tool(tool_name, tool_request)
-
+            print("tool response", tool_response.output)
         except Exception as e:
             tool_response = ToolResponse(
                 tool_name=tool_name,
@@ -135,14 +118,7 @@ class RealGraphExecuter(GraphExecutorPort):
                 error=str(e),
             )
 
-        # ----------------------------
-        # SAVE OUTPUT
-        # ----------------------------
         tool_output_registry.save_response(tool_response)
-
-        # ----------------------------
-        # UPDATE CONTEXT
-        # ----------------------------
         context.update(tool_name, tool_response.output)
-
-        return False
+        
+        print("updated context: ", context.context)

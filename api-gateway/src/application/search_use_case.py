@@ -40,7 +40,12 @@ class SearchUseCase:
 
             return SearchResponse(
                 success=True,
-                answer=answer
+                answer=answer,
+                metadata={
+                    'tools':str(tools),
+                    'plan':str(plan),
+                    'context': str(context)
+                }
             )
 
         except Exception as e:

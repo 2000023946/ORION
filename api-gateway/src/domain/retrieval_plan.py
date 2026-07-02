@@ -70,3 +70,18 @@ class RetrievalPlan:
                     queue.append(child)
 
         return order
+    
+    def __str__(self) -> str:
+        if not self.graph:
+            self.generate_graph()
+
+        lines = ["RetrievalPlan DAG:"]
+
+        for source, targets in self.graph.items():
+            if not targets:
+                lines.append(f"{source} -> END")
+            else:
+                for t in targets:
+                    lines.append(f"{source} -> {t}")
+
+        return "\n".join(lines)

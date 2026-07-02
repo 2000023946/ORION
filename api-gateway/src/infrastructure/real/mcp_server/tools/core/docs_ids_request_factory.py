@@ -4,15 +4,17 @@ from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKey
 from src.infrastructure.real.mcp_server.tools.core.tool_output_registry import ToolOutputRegistry
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
 from src.infrastructure.real.mcp_server.tools.core.tool_request_factory import ToolRequestFactory
+from src.infrastructure.real.mcp_server.tools.vector_search.doc_id import DocId
 
 
 class DocsIdsRequestFactory(ToolRequestFactory):    
     def create(self, tool_name: ToolName, tool_output_registry: ToolOutputRegistry) -> ToolRequest:
         docs_ids = tool_output_registry.get(ToolIOKeys.DOCS_IDS)
+        
         tool_request = ToolRequest(
             tool_name=tool_name, 
             params={
-                ToolIOKeys.DOCS_IDS: docs_ids
+                ToolIOKeys.DOCS_IDS: [DocId(docs['id']) for docs in docs_ids]
             }
         )
         return tool_request

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 from src.domain.search_answer import SearchAnswer
 
 
@@ -7,4 +7,5 @@ from src.domain.search_answer import SearchAnswer
 class SearchResponse:
     success: bool
     answer: Optional[SearchAnswer] = None
+    metadata: Optional[dict[str, Any]] = None
     error: Optional[str] = None

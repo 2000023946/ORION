@@ -34,6 +34,15 @@ def test_tool_initialization():
     assert tool.inputs == inputs
     assert tool.outputs == outputs
 
+    # ----------------------------
+    # __str__ validation
+    # ----------------------------
+    tool_str = str(tool)
+
+    assert "VECTOR_SEARCH" in tool_str
+    assert "QUERY" in tool_str
+    assert "DOCUMENTS" in tool_str
+
 
 def test_tool_with_empty_inputs_and_outputs():
     tool = Tool(
@@ -47,3 +56,13 @@ def test_tool_with_empty_inputs_and_outputs():
     assert tool.outputs == []
     assert tool.name == ToolName("EMPTY_TOOL")
     assert tool.description == "No inputs or outputs."
+
+    # ----------------------------
+    # __str__ validation (empty case)
+    # ----------------------------
+    tool_str = str(tool)
+
+    assert "EMPTY_TOOL" in tool_str
+    assert "inputs" in tool_str
+    assert "outputs" in tool_str
+    assert "none" in tool_str.lower()
