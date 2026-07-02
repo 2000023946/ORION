@@ -64,7 +64,7 @@ async def main() -> None:
     # ----------------------------
     # 4. User query
     # ----------------------------
-    query = "Products below $500"
+    query = "phones with good battery life that are under $600"
 
     tool_request = ToolRequest(
         tool_name=DB_FILTER_TOOL.name,
