@@ -12,15 +12,7 @@ class MCPServerInfrastructure:
     def __init__(self):
         # Make the tool Names
         VECTOR_SEARCH_TOOL = ToolName("VECTOR_SEARCH_TOOL")
-        WEB_SEARH_TOOL = ToolName("WEB_SEARH_TOOL")
-        DB_FILTER_TOOL = ToolName("DB_FILTER_TOOL")
-        METADATA_FILTER_TOOL = ToolName("METADATA_FILTER_TOOL")
-        Tool(
-            name=VECTOR_SEARCH_TOOL,
-            description='',
-            input=[Input(name=ToolIOKeys.QUERY, type='str', description='User Query')],
-            output=[Output(name=ToolIOKeys.DOCS_IDS, type='list[Docs_ids(id: str)]', description='')]
-        )
+
         # Fill in the registry information
         tool_information_registry = ToolInformationRegistry()
         tool_information_registry.register()
