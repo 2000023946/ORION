@@ -1,7 +1,7 @@
 import asyncio
 
 from src.domain.query import Query
-from src.infrastructure.config.seed import MongoSeeder
+from src.infrastructure.config.mongo_seeder import MongoSeeder
 from src.infrastructure.config.seed_data import SEED_DATA
 from src.infrastructure.config.settings import settings
 from src.infrastructure.real.http.real_http_client import RealHttpClient

@@ -5,3 +5,6 @@ uvicorn
 python-dotenv
 requests
 pymongo
+
+sentence-transformers
+faiss-cpu

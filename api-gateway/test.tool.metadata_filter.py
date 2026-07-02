@@ -12,7 +12,7 @@ Expected behavior:
 """
 import asyncio
 from src.infrastructure.config.settings import settings
-from src.infrastructure.config.seed import MongoSeeder
+from src.infrastructure.config.mongo_seeder import MongoSeeder
 from src.infrastructure.config.seed_data import SEED_DATA
 from src.infrastructure.real.mcp_server.tools.core.tool_information import METADATA_FILTER_TOOL
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys

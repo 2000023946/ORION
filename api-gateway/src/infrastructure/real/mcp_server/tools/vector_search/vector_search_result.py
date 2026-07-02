@@ -10,8 +10,9 @@ class VectorSearchResult:
 
     @classmethod
     def from_raw(cls, raw: dict[str, Any]) -> "VectorSearchResult":
+        print("raw info", raw)
         return cls(
-            doc_id=DocId(raw["id"]),
+            doc_id=DocId(raw["doc_id"]),
             score=float(raw["score"])
         )
 

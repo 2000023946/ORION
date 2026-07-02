@@ -29,7 +29,7 @@ class Settings:
     # Embeddings
     # ----------------------------
     embedding_api: str = os.getenv("EMBEDDING_API", "")
-    embedding_model: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
+    embedding_model: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
 
     # ----------------------------
     # Vector DB (FAISS / Pinecone / Weaviate)
@@ -41,6 +41,7 @@ class Settings:
     vector_db_index: str = os.getenv("VECTOR_DB_INDEX", "main-index")
 
     vector_top_k: int = int(os.getenv("VECTOR_TOP_K", "5"))
+    vector_db_dim: int = int(os.getenv("VECTOR_DB_DIM", 384))
 
     # ----------------------------
     # 📄 Metadata / Document DB (NEW)
