@@ -98,6 +98,15 @@ DB_FILTER_TOOL = Tool(
         "- It is independent of METADATA_FILTER_TOOL\n\n"
         "HARD CONSTRAINT:\n"
         "- If query cannot be parsed into DB filters → tool may return empty result\n"
+        "USE ONLY WHEN:"
+        "- Query contains structured constraints like:"
+       " - price ranges (under $500, between X and Y)"
+        """- filters (brand = Apple, category = phone)
+        - database-like queries
+
+        DO NOT USE WHEN:
+        - Query is semantic or informational
+        - Query asks for "latest", "best", "newest", "what is"""
     ),
     inputs=[
         Input(

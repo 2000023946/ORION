@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware # 1. Import this
 
 from src.components.app import App
 
@@ -26,6 +27,15 @@ class SearchResponseModel(BaseModel):
 # -------------------------
 
 app = FastAPI(title="MCP DAG Agent")
+
+# 2. Add the CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, replace "*" with your frontend URL (e.g., "http://localhost:3000")
+    allow_credentials=True,
+    allow_methods=["*"], # This allows GET, POST, OPTIONS, etc.
+    allow_headers=["*"], # This allows all headers like Content-Type
+)
 
 # initialize system once (composition root)
 system = App()

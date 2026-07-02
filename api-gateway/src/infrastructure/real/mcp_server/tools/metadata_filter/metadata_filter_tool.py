@@ -53,7 +53,8 @@ class MetadataFilterTool(ToolPort):
                         "id": d.doc_id,
                         "title": d.title,
                         "content": d.content,
-                        "metadata": d.metadata
+                        "metadata": d.metadata,
+                        'price': d.price
                     }
                     for d in metadata_response.documents
                 ]
