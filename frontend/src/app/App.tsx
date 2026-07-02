@@ -158,36 +158,32 @@ export default function App() {
     
     setSubmittedQuery(q.trim());
     setPhase("thinking");
-    setErrorMsg(null);
+    setErrorMsg(null); // Clear any old errors
 
     try {
-      // REPLACE "/your-endpoint" with your actual FastAPI route!
       const response = await fetch("http://127.0.0.1:8000/search", {
-        method: "POST", // Assuming POST since you are sending a query
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q.trim() }), 
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const data = await response.json();
       
-      // Check if your API returned success based on your terminal output
+      // Check if your FastAPI backend flagged success=True
       if (data.success) {
-        setAnswerData(data); // Save the whole payload (answer, metadata, plan)
-        setPhase("streaming");
+        setAnswerData(data);
+        setPhase("streaming"); // Or "idle" depending on your setup
       } else {
-        throw new Error(data.error || "API returned an unsuccessful response");
+        // If success=False, grab the error string from your Python API
+        setErrorMsg(data.error || "The server encountered an issue, but no error message was provided.");
+        setPhase("idle"); // Stop the thinking/loading animation
       }
 
     } catch (error) {
+      // This catches network crashes (e.g., if Uvicorn is turned off)
       console.error("Failed to fetch from API:", error);
-      setErrorMsg(error.message);
-      setPhase("idle"); // Reset phase or set to an "error" phase if you have one
+      setErrorMsg("Failed to connect to the server. Is Uvicorn running?");
+      setPhase("idle"); 
     }
   };
 
@@ -224,6 +220,43 @@ export default function App() {
         fontFamily: "Inter, sans-serif",
       }}
     >
+      {/* ==========================================
+          ERROR POPUP (TOAST)
+          ========================================== */}
+      {errorMsg && (
+        <div 
+          className="fixed bottom-6 right-6 max-w-sm w-full bg-red-950 border border-red-800/50 p-4 rounded-xl shadow-2xl flex items-start gap-3 z-50 transition-all"
+          style={{ animation: "slide-up 0.3s ease-out" }}
+        >
+          {/* Warning Icon */}
+          <div className="shrink-0 mt-0.5">
+            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          
+          {/* Error Message Text */}
+          <div className="flex-1 flex flex-col gap-1">
+            <span className="text-red-500 font-semibold text-sm">
+              Execution Failed
+            </span>
+            <span className="text-red-200/80 text-sm leading-relaxed">
+              {errorMsg}
+            </span>
+          </div>
+
+          {/* Close Button */}
+          <button 
+            onClick={() => setErrorMsg(null)}
+            className="shrink-0 p-1 rounded-md text-red-500 hover:text-red-300 hover:bg-red-900/50 transition-colors"
+            title="Dismiss"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-2">
@@ -473,100 +506,100 @@ export default function App() {
                     </div>
                   <div className="flex flex-col gap-8 mb-6">
   
-  {/* ==========================================
-      1. THE ANSWER SECTION
-      ========================================== */}
-  {answerData?.answer?.answer && (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <h3 style={{ fontWeight: 600, fontSize: "16px", color: "#f3f4f6" }}>
-          Answer
-        </h3>
-      </div>
-      <div style={{ color: "#d1d5db", lineHeight: 1.6, fontSize: "15px" }}>
-        {answerData.answer.answer}
-      </div>
-    </div>
-  )}
+                    {/* ==========================================
+                        1. THE ANSWER SECTION
+                        ========================================== */}
+                    {answerData?.answer?.answer && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <h3 style={{ fontWeight: 600, fontSize: "16px", color: "#f3f4f6" }}>
+                            Answer
+                          </h3>
+                        </div>
+                        <div style={{ color: "#d1d5db", lineHeight: 1.6, fontSize: "15px" }}>
+                          {answerData.answer.answer}
+                        </div>
+                      </div>
+                    )}
 
-  {/* ==========================================
-      2. THE PLAN SECTION (DAG Arrows)
-      ========================================== */}
-  {answerData?.metadata?.plan && (
-    <div className="flex flex-col gap-3">
-      <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        Execution Plan
-      </h3>
-      <div className="flex flex-col gap-2">
-        {parseExecutionPlan(answerData.metadata.plan).map((step, index) => (
-          <div key={index} className="flex items-center gap-3 text-xs" style={{ fontFamily: "JetBrains Mono, monospace" }}>
-            <span className="text-gray-500 w-12">Step {index + 1}</span>
-            <div className="flex items-center gap-2 bg-gray-800/50 p-1.5 rounded-md border border-gray-700/50">
-              <span className="text-blue-400 px-2 py-0.5 bg-blue-500/10 rounded">
-                {step[0]}
-              </span>
-              <span className="text-gray-500">→</span>
-              <span className="text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded">
-                {step[1]}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )}
+                    {/* ==========================================
+                        2. THE PLAN SECTION (DAG Arrows)
+                        ========================================== */}
+                    {answerData?.metadata?.plan && (
+                      <div className="flex flex-col gap-3">
+                        <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          Execution Plan
+                        </h3>
+                        <div className="flex flex-col gap-2">
+                          {parseExecutionPlan(answerData.metadata.plan).map((step, index) => (
+                            <div key={index} className="flex items-center gap-3 text-xs" style={{ fontFamily: "JetBrains Mono, monospace" }}>
+                              <span className="text-gray-500 w-12">Step {index + 1}</span>
+                              <div className="flex items-center gap-2 bg-gray-800/50 p-1.5 rounded-md border border-gray-700/50">
+                                <span className="text-blue-400 px-2 py-0.5 bg-blue-500/10 rounded">
+                                  {step[0]}
+                                </span>
+                                <span className="text-gray-500">→</span>
+                                <span className="text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded">
+                                  {step[1]}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-  {/* ==========================================
-      3. THE CONTEXT SECTION (Collapsible Tools)
-      ========================================== */}
-  {answerData?.metadata?.context && (
-    <div className="flex flex-col gap-3">
-      <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-        Tool Context
-      </h3>
-      
-      <div className="flex flex-col gap-2">
-        {parseContextByTool(answerData.metadata.context).map((item, i) => (
-          /* Using the native HTML <details> tag for a zero-state collapsible dropdown */
-          <details 
-            key={i} 
-            className="group rounded-lg border border-gray-800 bg-gray-900/40 overflow-hidden"
-          >
-            <summary className="flex cursor-pointer items-center justify-between p-3 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition-colors list-none">
-              <div className="flex items-center gap-3">
-                {/* A little indicator to show it's a tool */}
-                <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-800 text-gray-400 text-xs">
-                  {i + 1}
-                </span>
-                <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#a5b4fc" }}>
-                  {item.tool}
-                </span>
-              </div>
-              
-              {/* Dropdown Arrow (Rotates when open via Tailwind group-open class) */}
-              <svg 
-                className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" 
-                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            
-            {/* The collapsible content area */}
-            <div className="border-t border-gray-800 p-4 bg-black/20">
-              <pre 
-                className="text-xs text-gray-400 overflow-x-auto whitespace-pre-wrap" 
-                style={{ fontFamily: "JetBrains Mono, monospace", lineHeight: 1.5 }}
-              >
-                {item.output}
-              </pre>
-            </div>
-          </details>
-        ))}
-      </div>
-    </div>
-  )}
-</div>
+                    {/* ==========================================
+                        3. THE CONTEXT SECTION (Collapsible Tools)
+                        ========================================== */}
+                    {answerData?.metadata?.context && (
+                      <div className="flex flex-col gap-3">
+                        <h3 style={{ fontWeight: 600, fontSize: "14px", color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          Tool Context
+                        </h3>
+                        
+                        <div className="flex flex-col gap-2">
+                          {parseContextByTool(answerData.metadata.context).map((item, i) => (
+                            /* Using the native HTML <details> tag for a zero-state collapsible dropdown */
+                            <details 
+                              key={i} 
+                              className="group rounded-lg border border-gray-800 bg-gray-900/40 overflow-hidden"
+                            >
+                              <summary className="flex cursor-pointer items-center justify-between p-3 text-sm font-semibold text-gray-300 hover:bg-gray-800 transition-colors list-none">
+                                <div className="flex items-center gap-3">
+                                  {/* A little indicator to show it's a tool */}
+                                  <span className="flex h-5 w-5 items-center justify-center rounded bg-gray-800 text-gray-400 text-xs">
+                                    {i + 1}
+                                  </span>
+                                  <span style={{ fontFamily: "JetBrains Mono, monospace", color: "#a5b4fc" }}>
+                                    {item.tool}
+                                  </span>
+                                </div>
+                                
+                                {/* Dropdown Arrow (Rotates when open via Tailwind group-open class) */}
+                                <svg 
+                                  className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" 
+                                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </summary>
+                              
+                              {/* The collapsible content area */}
+                              <div className="border-t border-gray-800 p-4 bg-black/20">
+                                <pre 
+                                  className="text-xs text-gray-400 overflow-x-auto whitespace-pre-wrap" 
+                                  style={{ fontFamily: "JetBrains Mono, monospace", lineHeight: 1.5 }}
+                                >
+                                  {item.output}
+                                </pre>
+                              </div>
+                            </details>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   </div>
                 )}
 

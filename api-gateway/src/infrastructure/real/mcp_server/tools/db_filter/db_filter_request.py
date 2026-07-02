@@ -8,7 +8,7 @@ from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolReque
 class DBFilterRequest(ToolRequest):
     query: Query
     @classmethod
-    def create(cls, tool_request: ToolRequest) -> DBFilterRequest:
+    def create(cls, tool_request: ToolRequest) -> "DBFilterRequest":
         if ToolIOKeys.QUERY not in tool_request.params:
             raise ValueError("Web search cannot be called without query param")
         

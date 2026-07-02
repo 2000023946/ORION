@@ -1,0 +1,27 @@
+# Build stage
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Copy package files first (better caching)
+COPY package*.json ./
+
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build production bundle
+RUN npm run build
+
+
+# Serve stage (lightweight nginx)
+FROM nginx:alpine
+
+# Copy built files to nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Expose default HTTP port
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

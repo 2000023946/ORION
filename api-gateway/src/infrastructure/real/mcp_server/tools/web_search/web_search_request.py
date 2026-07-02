@@ -8,7 +8,7 @@ from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolReque
 class WebSearchRequest(ToolRequest):
     query: Query
     @classmethod
-    def create(cls, tool_request: ToolRequest) -> WebSearchRequest:
+    def create(cls, tool_request: ToolRequest) -> "WebSearchRequest":
         if ToolIOKeys.QUERY not in tool_request.params:
             raise ValueError("Web search cannot be called without query param")
         

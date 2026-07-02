@@ -49,7 +49,7 @@ class Settings:
 
     metadata_db_api_key: str = os.getenv("METADATA_DB_API_KEY", "")
 
-    metadata_db_url: str = os.getenv("METADATA_DB_URL", "mongodb://localhost:27017")
+    metadata_db_url: str = os.getenv("METADATA_DB_URL", "mongodb://mongodb:27017")
 
     metadata_db_index: str = os.getenv("METADATA_DB_INDEX", "documents")
 
