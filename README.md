@@ -176,6 +176,12 @@ Use them to:
 * debug orchestration issues
 * test real system flows end-to-end at component level
 
+Example:
+
+```bash
+python3 test.graph_executor.py
+```
+
 ---
 
 ### ⚠️ Integrated, Unit, Scripts Requirements
