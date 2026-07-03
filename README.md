@@ -184,17 +184,6 @@ python3 test.graph_executor.py
 
 ---
 
-### ⚠️ Integrated, Unit, Scripts Requirements
-
-To run integrated, unit, scripts tests you need:
-
-* Python venv activated
-* Dependencies installed (`requirements.txt`)
-* Docker running OR MongoDB running locally
-* `.env` file with API keys configured
-
----
-
 # 🧠 Key Idea
 
 * **Frontend demo** → shows full system working end-to-end
