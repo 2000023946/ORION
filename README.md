@@ -178,9 +178,9 @@ Use them to:
 
 ---
 
-### ⚠️ Integrated Test Requirements
+### ⚠️ Integrated, Unit, Scripts Requirements
 
-To run integrated tests you need:
+To run integrated, unit, scripts tests you need:
 
 * Python venv activated
 * Dependencies installed (`requirements.txt`)
