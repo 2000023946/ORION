@@ -85,7 +85,7 @@ DB_FILTER_TOOL = Tool(
         "- Translates user query into structured database filters (Mongo-style)\n"
         "- Performs exact or range-based filtering (name, price, category)\n\n"
         "INPUT RULES:\n"
-        "- Requires query: str (MANDATORY)\n"
+        "- Requires query: str (MANDATORY). CANNOT WORK AFTER VECTOR SEARCH.\n"
         "- Query MUST be structured or semi-structured intent\n\n"
         "OUTPUT RULES:\n"
         "- Returns: documents: list[Document]\n"
