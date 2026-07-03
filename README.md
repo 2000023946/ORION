@@ -22,17 +22,22 @@ All tools are orchestrated through a central MCP execution layer that plans, exe
 User Query → MCP Planner → DAG Execution → Tool Layer → Context → Final LLM Answer
 ```
 
+Here’s a tighter version that keeps the meaning but makes it very minimal:
+
 ---
 
-## 📄 System Architecture
+## 🧠 System Design
 
-System architecture diagrams and detailed design docs are available in:
+Orion follows a **modular, interface-driven (DDD-style) architecture** with clear separation between domain, application, and infrastructure layers. This enables high testability, maintainability, and pluggable MCP tool execution.
+
+Full architecture details:
 
 ```
 ./docs
 ```
 
 ---
+
 
 
 # 🚀 Run the Application (Demo Mode)
@@ -204,3 +209,93 @@ python3 test.graph_executor.py
 | tests/integrated          | Full MCP component-level debugging    |
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+# ❌ What NOT to do
+
+Do NOT add:
+
+* folder-by-folder explanation (`domain/`, `infrastructure/`, etc.)
+* MCP client/server breakdown
+* DAG executor internals
+* tool registry explanation
+
+That will:
+
+* bloat the README
+* duplicate `/docs`
+* make onboarding worse
+
+---
+
+# 📂 Where your “real code explanation” should go
+
+Put the full version here instead:
+
+## 👉 `/docs/system-architecture.md`
+
+That file should contain:
+
+* MCP lifecycle (planner → DAG → executor)
+* graph execution model
+* tool registry system
+* vector/db/web pipeline
+* real architecture diagrams
+
+That is your **engineering brain of the system**
+
+---
+
+# 🧠 Simple rule (very important)
+
+| Location           | Purpose                     |
+| ------------------ | --------------------------- |
+| README.md          | “How do I run this?”        |
+| /docs              | “How does this work?”       |
+| api-gateway README | “How do I develop backend?” |
+
+---
+
+# 🔥 Why this matters for your project specifically
+
+Your system is:
+
+* DAG-based
+* multi-tool orchestration
+* LLM-driven planning
+* modular infrastructure
+
+That means it is already **complex enough that duplication becomes dangerous fast**
+
+So you want:
+
+> minimal README
+> strong docs
+> clean separation of concerns
+
+---
+
+# 👍 Final answer
+
+✔ Keep your README as-is
+✔ Add ONLY a tiny “System Design” pointer section
+✔ Put full modular architecture in `/docs`
+❌ Do NOT describe the codebase in the README
+
+---
+
+If you want next step, I can help you:
+
+* design a **perfect `/docs` structure (like real system design docs)**
+* or compress your README even more into a “startup landing page style”
+* or make your repo look like a **production AI infra system (YC-style)**
