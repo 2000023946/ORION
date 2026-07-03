@@ -25,7 +25,6 @@ User Query → MCP Planner → DAG Execution → Tool Layer → Context → Fina
 Here’s a tighter version that keeps the meaning but makes it very minimal:
 
 ---
-
 ## 🧠 System Design
 
 Orion follows a **modular, interface-driven (DDD-style) architecture** with clear separation between domain, application, and infrastructure layers. This enables high testability, maintainability, and pluggable MCP tool execution.
@@ -38,6 +37,20 @@ Full architecture details:
 
 ---
 
+## 🎥 GIF Demo
+
+A short demo showing a full end-to-end query flow through the MCP system:
+
+* User query input in the frontend
+* MCP planner generating a retrieval plan (DAG)
+* Tool execution (vector / DB / web / metadata)
+* Final aggregated LLM response
+
+This demonstrates how Orion dynamically orchestrates tools and executes structured reasoning steps in real time.
+
+![Orion Demo](assets/demo.gif)
+
+---
 
 
 # 🚀 Run the Application (Demo Mode)
