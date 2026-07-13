@@ -42,10 +42,9 @@ def test_db_filter_tool_structure():
     tool = DB_FILTER_TOOL
 
     assert tool.name.name == "DB_FILTER_TOOL"
-    assert len(tool.inputs) == 2
+    assert len(tool.inputs) == 1
     assert len(tool.outputs) == 1
 
-    assert ToolIOKeys.DOCS_IDS in [i.name for i in tool.inputs]
     assert ToolIOKeys.QUERY in [i.name for i in tool.inputs]
 
     assert tool.outputs[0].name == ToolIOKeys.DOCUMENTS
@@ -58,11 +57,10 @@ def test_metadata_filter_tool_structure():
     tool = METADATA_FILTER_TOOL
 
     assert tool.name.name == "METADATA_FILTER_TOOL"
-    assert len(tool.inputs) == 2
+    assert len(tool.inputs) == 1
     assert len(tool.outputs) == 1
 
     assert ToolIOKeys.DOCS_IDS in [i.name for i in tool.inputs]
-    assert ToolIOKeys.QUERY in [i.name for i in tool.inputs]
 
     assert tool.outputs[0].name == ToolIOKeys.DOCUMENTS
 

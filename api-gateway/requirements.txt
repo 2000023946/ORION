@@ -13,3 +13,5 @@ faiss-cpu
 pytest
 
 pytest-asyncio
+
+pytest-cov
