@@ -1,4 +1,3 @@
-from src.infrastructure.real.mcp_client.planning import prompt
 from src.infrastructure.real.mcp_client.planning.create_plan_instruction import CREATE_PLAN_INSTRUCTION
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
 from src.domain.context import Context
