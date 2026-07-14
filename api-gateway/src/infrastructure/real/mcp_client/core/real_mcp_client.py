@@ -16,17 +16,19 @@ from src.domain.tool_edge import ToolEdge
 class RealMCPClient(MCPClientPort):
     def __init__(
             self, 
-            llm: LLMPort, 
+            llm_plan: LLMPort, 
+            llm_answer: LLMPort,
             prompt_factory: PromptFactoryPort, 
             plan_parser: RetrievalPlanParserPort
         ):
-        self.llm = llm
+        self.llm_plan = llm_plan
+        self.llm_answer = llm_answer
         self.prompt_factory = prompt_factory
         self.plan_parser = plan_parser
     
     async def create_plan(self, query: Query, tools: list[Tool]) -> RetrievalPlan:
         prompt: Prompt = self.prompt_factory.create_plan_prompt(query, tools)
-        llm_output: LLMResponse = await self.llm.generate(prompt)
+        llm_output: LLMResponse = await self.llm_plan.generate(prompt)
         print("llm_output", llm_output)
         json_output = llm_output.get_response()
         
@@ -41,6 +43,6 @@ class RealMCPClient(MCPClientPort):
     async def answer(self, query: Query, context: Context) -> SearchAnswer:
         prompt = self.prompt_factory.create_answer_prompt(query, context)
 
-        response: LLMResponse = await self.llm.generate(prompt)
+        response: LLMResponse = await self.llm_answer.generate(prompt)
 
         return SearchAnswer(answer=response.get_response())

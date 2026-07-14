@@ -1,3 +1,4 @@
+from src.infrastructure.mock.mock_llm_answer import MockAnswerLLM
 from src.infrastructure.mock.mock_llm_plan import MockPlanLLM
 from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.http.real_http_client import RealHttpClient
@@ -15,20 +16,23 @@ class MCPClientInfrastructure:
         self.json_parser: JsonAdapter = JsonAdapter()
         self.llm: LLMPort = LLM(http_client=self.http_client, json_parser=self.json_parser)
         self.prompt_factory: PromptFactory = PromptFactory()
-        self.mock_llm  = MockPlanLLM()
-        
+        self.mock_plan_llm  = MockPlanLLM()
+        self.mock_answer_llm = MockAnswerLLM()
         self.plan_parser = RetrievalPlanParser(json=self.json_parser)
         self.mcp_client = RealMCPClient(
-            llm=self.llm,
+            llm_plan=self.llm,
+            llm_answer=self.llm,
             prompt_factory=self.prompt_factory,
             plan_parser=self.plan_parser
         )
         
     def use_mock(self):
-        self.mcp_client.llm = self.mock_llm
+        self.mcp_client.llm_plan = self.mock_plan_llm
+        self.mcp_client.llm_answer = self.mock_answer_llm
         
     def use_real(self):
-        self.mcp_client.llm = self.llm
+        self.mcp_client.llm_plan = self.llm
+        self.mcp_client.llm_answer = self.llm
         
         
         

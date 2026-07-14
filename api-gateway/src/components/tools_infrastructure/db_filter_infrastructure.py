@@ -1,6 +1,7 @@
 from src.infrastructure.config.settings import settings
 from src.infrastructure.config.mongo_seeder import MongoSeeder
 from src.infrastructure.config.seed_data import SEED_DATA
+from src.infrastructure.mock.mock_db_filter_llm import MockDbFilterLLM
 from src.infrastructure.real.http.real_http_client import RealHttpClient
 from src.infrastructure.real.mcp_client.llm.llm import LLM
 from src.infrastructure.real.mcp_client.parsing.json_adapter import JsonAdapter
@@ -31,7 +32,8 @@ class DBFilterInfrastructure:
         json_parser=JsonAdapter()
         prompt_factory=PromptFactory()
         real_http_client = RealHttpClient()
-        llm = LLM(http_client=real_http_client, json_parser=json_parser)
+        self.mock_llm = MockDbFilterLLM()
+        self.llm = LLM(http_client=real_http_client, json_parser=json_parser)
         # ----------------------------
         # tool (NO LLM REQUIRED HERE)
         # ----------------------------
@@ -39,7 +41,17 @@ class DBFilterInfrastructure:
             http_client=self.mongo_http_client,
             json_parser=json_parser,
             prompt_factory=prompt_factory,
-            llm_port=llm
+            llm_port=self.llm
         ) 
 
         return self.tool
+    
+    def use_mock(self):
+        if not self.tool:
+            raise ValueError("must build first")
+        self.tool.llm_port = self.mock_llm
+        
+    def use_real(self):
+        if not self.tool:
+            raise ValueError("must build first")
+        self.tool.llm_port = self.llm

@@ -7,17 +7,21 @@ from src.application.search_use_case import SearchUseCase
 from src.domain.query import Query
 
 class App:
-    def __init__(self):
+    def __init__(self, mock: bool = False):
         # infrastructure layer
-        self.mcp_server = MCPServerInfrastructure().mcp_server
-        self.mcp_client = MCPClientInfrastructure().mcp_client
-        self.graph_executor = GraphExecutorInfrastructure().graph_executor
+        self.mcp_server_infras = MCPServerInfrastructure()
+        self.mcp_client_infras = MCPClientInfrastructure()
+        self.graph_executor_infras = GraphExecutorInfrastructure()
+        
+        if mock:
+            self.mcp_client_infras.use_mock()
+            self.mcp_server_infras.use_mock()
 
         # application layer (use case)
         self.search_use_case = SearchUseCase(
-            mcp_client=self.mcp_client,
-            mcp_server=self.mcp_server,
-            graph_executor=self.graph_executor
+            mcp_client=self.mcp_client_infras.mcp_client,
+            mcp_server=self.mcp_server_infras.mcp_server,
+            graph_executor=self.graph_executor_infras.graph_executor
         )
 
     async def run(self, query_text: str):

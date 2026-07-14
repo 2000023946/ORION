@@ -7,31 +7,42 @@ from src.infrastructure.real.mcp_server.tools.core.tool_information import DB_FI
 from src.infrastructure.real.mcp_server.tools.core.tool_information_registry import ToolInformationRegistry
 from src.infrastructure.real.mcp_server.tools.core.tool_registry_port import ToolRegistryPort
 
-
 class MCPServerInfrastructure:
     def __init__(self):
-        # REGISTER THE TOOLS
+        # Register tool metadata
         tool_information_registry = ToolInformationRegistry()
         tool_information_registry.register(VECTOR_SEARCH_TOOL.name, VECTOR_SEARCH_TOOL)
         tool_information_registry.register(WEB_SEARCH_TOOL.name, WEB_SEARCH_TOOL)
         tool_information_registry.register(METADATA_FILTER_TOOL.name, METADATA_FILTER_TOOL)
         tool_information_registry.register(DB_FILTER_TOOL.name, DB_FILTER_TOOL)
-        
-        # INITIALIZE TOOLS INFRAS
-        vector_search_tool = VectorSearchInfrasture().build()
-        web_search_tool = WebSearchInfrastructure().build()
-        metadata_filter_tool = MetadataFilterInfrastructure().build()
-        db_filter_tool = DBFilterInfrastructure().build()
-        
-        # REGISTER THE TOOL PORTS
-        tool_registry_port = ToolRegistryPort()
-        tool_registry_port.register(VECTOR_SEARCH_TOOL.name, vector_search_tool)
-        tool_registry_port.register(WEB_SEARCH_TOOL.name, web_search_tool)
-        tool_registry_port.register(METADATA_FILTER_TOOL.name, metadata_filter_tool)
-        tool_registry_port.register(DB_FILTER_TOOL.name, db_filter_tool)
-        
-        # CREATE THE MCP SERVER
+
+        # Keep infrastructure objects
+        self.vector_search_infra = VectorSearchInfrasture()
+        self.web_search_infra = WebSearchInfrastructure()
+        self.metadata_filter_infra = MetadataFilterInfrastructure()
+        self.db_filter_infra = DBFilterInfrastructure()
+
+        # Build tools
+        vector_tool = self.vector_search_infra.build()
+        web_tool = self.web_search_infra.build()
+        metadata_tool = self.metadata_filter_infra.build()
+        db_tool = self.db_filter_infra.build()
+
+        tool_registry = ToolRegistryPort()
+        tool_registry.register(VECTOR_SEARCH_TOOL.name, vector_tool)
+        tool_registry.register(WEB_SEARCH_TOOL.name, web_tool)
+        tool_registry.register(METADATA_FILTER_TOOL.name, metadata_tool)
+        tool_registry.register(DB_FILTER_TOOL.name, db_tool)
+
         self.mcp_server = RealMCPServer(
-            tool_registry_port=tool_registry_port,
-            tool_information_registry=tool_information_registry
+            tool_registry_port=tool_registry,
+            tool_information_registry=tool_information_registry,
         )
+        
+    def use_mock(self):
+        self.web_search_infra.use_mock()
+        self.db_filter_infra.use_mock()
+
+    def use_real(self):
+        self.web_search_infra.use_real()
+        self.db_filter_infra.use_real()

@@ -38,7 +38,7 @@ app.add_middleware(
 )
 
 # initialize system once (composition root)
-system = App()
+system = App(mock=True)
 
 
 # -------------------------
@@ -49,6 +49,7 @@ system = App()
 async def search(req: SearchRequest):
     
     result = await system.run(req.query)
+    print('rest', result)
     return SearchResponseModel(
         success=result.success,
         answer=result.answer.to_dict() if result.answer else None,
