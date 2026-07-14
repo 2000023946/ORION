@@ -12,3 +12,8 @@ api-gateway/*.pyo
 # Virtual environments
 venv/
 .env
+
+.vscode
+
+
+.DS_Store
