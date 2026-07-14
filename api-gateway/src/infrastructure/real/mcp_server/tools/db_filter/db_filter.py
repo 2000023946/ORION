@@ -33,7 +33,7 @@ class DBFilter:
         # NAME (case-insensitive contains)
         # -----------------------
         if self.name:
-            query["name"] = {
+            query["title"] = {
                 "$regex": self.name,
                 "$options": "i"  # case-insensitive
             }
