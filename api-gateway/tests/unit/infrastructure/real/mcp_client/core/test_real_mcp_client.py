@@ -76,7 +76,7 @@ async def test_create_plan_success():
     factory = FakePromptFactory()
     parser = FakeParser()
 
-    client = RealMCPClient(llm, factory, parser)
+    client = RealMCPClient(llm, llm, factory, parser)
 
     query = Query("hello")
 
@@ -111,7 +111,7 @@ async def test_answer_success():
     factory = FakePromptFactory()
     parser = FakeParser()
 
-    client = RealMCPClient(llm, factory, parser)
+    client = RealMCPClient(llm, llm, factory, parser)
 
     query = Query("what is ai")
     context = Context()
@@ -134,8 +134,8 @@ async def test_answer_llm_error():
 
     factory = FakePromptFactory()
     parser = FakeParser()
-
-    client = RealMCPClient(FailingLLM(), factory, parser)
+    llm = FailingLLM()
+    client = RealMCPClient(llm, llm, factory, parser)
 
     query = Query("x")
     context = Context()

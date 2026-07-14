@@ -19,16 +19,17 @@ class MCPClientInfrastructure:
         
         self.plan_parser = RetrievalPlanParser(json=self.json_parser)
         self.mcp_client = RealMCPClient(
-            llm=self.llm,
+            llm_plan=self.llm,
+            llm_answer=self.llm,
             prompt_factory=self.prompt_factory,
             plan_parser=self.plan_parser
         )
         
     def use_mock(self):
-        self.mcp_client.llm = self.mock_llm
+        self.mcp_client.llm_plan = self.mock_llm
         
     def use_real(self):
-        self.mcp_client.llm = self.llm
+        self.mcp_client.llm_plan = self.llm
         
         
         
