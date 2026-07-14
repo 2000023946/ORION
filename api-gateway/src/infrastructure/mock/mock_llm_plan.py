@@ -1,3 +1,4 @@
+import asyncio
 import json
 import random
 
@@ -64,6 +65,7 @@ class MockPlanLLM(LLMPort):
 
 
     async def generate(self, prompt: Prompt) -> LLMResponse:
+        await asyncio.sleep(1.0)   # Planner
 
         plan = random.choice(self.plans)
 

@@ -1,3 +1,5 @@
+import asyncio
+
 from src.infrastructure.real.mcp_client.llm.llm_port import LLMPort
 from src.infrastructure.real.mcp_client.llm.llm_response import LLMResponse
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
@@ -16,6 +18,8 @@ class MockAnswerLLM(LLMPort):
         Returns:
         - Natural language answer
         """
+
+        await asyncio.sleep(2.5)   
 
         text = prompt.prompt.lower()
 
