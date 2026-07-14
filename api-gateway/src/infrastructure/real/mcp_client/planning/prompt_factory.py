@@ -23,7 +23,6 @@ class PromptFactory(PromptFactoryPort):
 
             Return ONLY JSON.
         """
-        print('plan prompt:', prompt_text)
         return Prompt(prompt=prompt_text)
     
     def create_answer_prompt(self, query: Query, context: Context) -> Prompt:

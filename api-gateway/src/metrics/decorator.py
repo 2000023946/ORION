@@ -1,75 +1,103 @@
 import time
 import tracemalloc
+import inspect
 from datetime import datetime
 from functools import wraps
 from typing import Callable, TypeVar, ParamSpec
 
-from .metric import ComponentMetric
-from .collector import MetricsCollector
+from src.metrics.collector import MetricsCollector
+from src.metrics.metric import ComponentMetric
 
 
-# Preserve function arguments and return type
 P = ParamSpec("P")
 R = TypeVar("R")
-
 
 collector = MetricsCollector()
 
 
-def measure(component_name: str) -> Callable[
-    [Callable[P, R]],
-    Callable[P, R]
-]:
-    """
-    Decorator that measures execution time and memory usage.
-    """
+def measure(component_name: str):
 
     def decorator(
         function: Callable[P, R]
-    ) -> Callable[P, R]:
+    ):
+
+        if inspect.iscoroutinefunction(function):
+
+            @wraps(function)
+            async def async_wrapper(
+                *args: P.args,
+                **kwargs: P.kwargs
+            ):
+
+                tracemalloc.start()
+
+                start = time.perf_counter()
+
+                result = await function(*args, **kwargs)
+
+                end = time.perf_counter()
+
+                _, peak = tracemalloc.get_traced_memory()
+
+                tracemalloc.stop()
+
+
+                collector.add_metric(
+                    ComponentMetric(
+                        timestamp=datetime.now(),
+                        component=component_name,
+                        duration_ms=round(
+                            (end-start)*1000,
+                            2
+                        ),
+                        memory_mb=round(
+                            peak/(1024*1024),
+                            2
+                        )
+                    )
+                )
+
+                return result
+
+            return async_wrapper
+
 
         @wraps(function)
-        def wrapper(
+        def sync_wrapper(
             *args: P.args,
             **kwargs: P.kwargs
-        ) -> R:
+        ):
 
             tracemalloc.start()
 
-            start_time = time.perf_counter()
+            start = time.perf_counter()
 
             result = function(*args, **kwargs)
 
-            end_time = time.perf_counter()
+            end = time.perf_counter()
 
-            _, peak_memory = tracemalloc.get_traced_memory()
+            _, peak = tracemalloc.get_traced_memory()
 
             tracemalloc.stop()
 
 
-            duration_ms = (
-                end_time - start_time
-            ) * 1000
-
-            memory_mb = (
-                peak_memory /
-                (1024 * 1024)
+            collector.add_metric(
+                ComponentMetric(
+                    timestamp=datetime.now(),
+                    component=component_name,
+                    duration_ms=round(
+                        (end-start)*1000,
+                        2
+                    ),
+                    memory_mb=round(
+                        peak/(1024*1024),
+                        2
+                    )
+                )
             )
-
-
-            metric = ComponentMetric(
-                timestamp=datetime.now(),
-                component=component_name,
-                duration_ms=round(duration_ms, 2),
-                memory_mb=round(memory_mb, 2)
-            )
-
-
-            collector.add_metric(metric)
-
 
             return result
 
-        return wrapper
+        return sync_wrapper
 
     return decorator

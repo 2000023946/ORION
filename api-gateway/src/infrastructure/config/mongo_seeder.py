@@ -24,7 +24,6 @@ class MongoSeeder:
 
     def clear(self) -> None:
         """Delete all documents in the collection."""
-        print("clearing...")
         self.collection.delete_many({})
 
     def seed(self, data: Sequence[dict[str, Any]]) -> None:
@@ -33,7 +32,6 @@ class MongoSeeder:
         """
         if not data:
             raise ValueError("Seed data is empty")
-        print(self.collection)
         self.collection.insert_many(list(data))
 
 
@@ -42,6 +40,4 @@ class MongoSeeder:
         Full reset + seed (most common dev usage).
         """
         self.clear()
-        print('date gome')
         self.seed(data)
-        print(f"Seeded {len(data)} documents into {self.collection.name}")

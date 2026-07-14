@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware # 1. Import this
 
 from src.components.app import App
-from src.metrics.decorator import measure
+from src.metrics.decorator import measure, collector
 
 
 # -------------------------
@@ -50,12 +50,18 @@ system = App(mock=True)
 async def search(req: SearchRequest):
     
     result = await system.run(req.query)
-    print('rest', result)
     return SearchResponseModel(
         success=result.success,
         answer=result.answer.to_dict() if result.answer else None,
         error=result.error,
         metadata=result.metadata
+    )
+    
+@app.on_event("shutdown") # type: ignore
+def save_metrics():
+
+    collector.export_csv(
+        "baseline_metrics.csv"
     )
 
     
