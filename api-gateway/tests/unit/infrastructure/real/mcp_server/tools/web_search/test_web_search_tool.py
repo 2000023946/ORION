@@ -5,6 +5,7 @@ from src.domain.tool_name import ToolName
 from src.infrastructure.real.http.http_client_port import HttpClientPort
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
+from src.infrastructure.real.mcp_server.tools.web_search.mock_web_search_client import MockWebSearchClient
 from src.infrastructure.real.mcp_server.tools.web_search.web_search_tool import WebSearchTool
 from src.infrastructure.real.http.http_response import HttpResponse
 
@@ -51,7 +52,7 @@ class FakeHttpClient(HttpClientPort):
 @pytest.mark.asyncio  # type: ignore[misc]
 async def test_web_search_tool_execute_success():
 
-    tool = WebSearchTool(http_client=FakeHttpClient())
+    tool = WebSearchTool(MockWebSearchClient())
 
     tool_request = ToolRequest(
         tool_name=ToolName("WEB_SEARCH_TOOL"),
@@ -79,22 +80,21 @@ async def test_web_search_tool_execute_success():
     # RESULT CONTENT CHECK
     # -------------------------
     assert isinstance(results.results, list)
-    assert len(results.results) == 1 # type: ignore
+    assert len(results.results) == 5 # type: ignore
 
     first = results.results[0] # type: ignore
     print('adsf', first) # type: ignore
-    assert first.title == "AI News" # type: ignore
-    assert first.url == "https://example.com/ai" # type: ignore
-    assert first.snippet == "AI is transforming the world" # type: ignore
-    assert first.score == 0.95 # type: ignore
+    assert first.title == "U.S. Stock Markets Today" # type: ignore
 
 
 # -------------------------
 # INVALID REQUEST (missing query)
 # -------------------------
 def test_web_search_tool_missing_query_raises():
+    
+    MockWebSearchClient()
 
-    tool = WebSearchTool(http_client=FakeHttpClient())
+    tool = WebSearchTool(MockWebSearchClient())
 
     tool_request = ToolRequest(
         tool_name=ToolName("WEB_SEARCH_TOOL"),

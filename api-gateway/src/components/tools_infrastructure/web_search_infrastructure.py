@@ -1,3 +1,4 @@
+from src.infrastructure.real.mcp_server.tools.web_search.http_web_search_client import HttpWebSearchClient
 from src.infrastructure.real.mcp_server.tools.web_search.web_search_tool import WebSearchTool
 
 
@@ -10,7 +11,7 @@ class WebSearchInfrastructure:
         from src.infrastructure.real.mcp_server.tools.web_search.web_search_tool import WebSearchTool
 
         http_client = RealHttpClient()
-
-        self.tool = WebSearchTool(http_client)
+        search_client = HttpWebSearchClient(http_client)
+        self.tool = WebSearchTool(search_client)
 
         return self.tool
