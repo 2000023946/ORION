@@ -3,3 +3,12 @@ htmlcov/*
 .coverage
 venv/*
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env
