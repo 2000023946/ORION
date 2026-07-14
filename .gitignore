@@ -1,1 +1,14 @@
-venv/*
+api-gateway/htmlcov/*
+api-gateway/.pytest_cache/*
+api-gateway/.coverage
+api-gateway/venv/*
+api-gateway/.env
+
+# Python
+api-gateway/__pycache__/
+api-gateway/*.py[cod]
+api-gateway/*.pyo
+
+# Virtual environments
+venv/
+.env

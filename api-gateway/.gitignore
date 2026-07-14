@@ -10,5 +10,4 @@ __pycache__/
 *.pyo
 
 # Virtual environments
-venv/
-.env
+venv/*
