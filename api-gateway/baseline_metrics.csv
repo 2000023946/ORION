@@ -1,5 +1,1 @@
 timestamp,component,duration_ms,memory_mb
-2026-07-14T00:39:26.351109,mcp_plan,1001.62,0.02
-2026-07-14T00:39:27.752543,web_search_tool,1401.11,0.01
-2026-07-14T00:39:27.752715,graph_executor,1401.6,0.0
-2026-07-14T00:39:30.254199,mcp_answer,2501.45,0.01
