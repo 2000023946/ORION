@@ -4,6 +4,7 @@ from src.domain.query import Query
 from src.infrastructure.config.mongo_seeder import MongoSeeder
 from src.infrastructure.config.seed_data import SEED_DATA
 from src.infrastructure.config.settings import settings
+from src.infrastructure.mock.mock_db_filter_llm import MockDbFilterLLM
 from src.infrastructure.real.http.real_http_client import RealHttpClient
 from src.infrastructure.real.mcp_client.llm.llm import LLM
 from src.infrastructure.real.mcp_client.parsing.json_adapter import JsonAdapter
@@ -30,6 +31,7 @@ async def main() -> None:
     # 0. Seed MongoDB
     # ----------------------------
     seeder = MongoSeeder()
+    print("made seeder")
     seeder.reset_and_seed(SEED_DATA)
     print("Successfully seeded DB!")
     
@@ -44,10 +46,9 @@ async def main() -> None:
     # ----------------------------
     # 2. LLM + supporting components
     # ----------------------------
-    real_http_client = RealHttpClient()
+    # real_http_client = RealHttpClient()
     json_parser = JsonAdapter()
-    llm = LLM(http_client=real_http_client, json_parser=json_parser)
-
+    llm = MockDbFilterLLM()
 
     prompt_factory = PromptFactory()
 
@@ -64,7 +65,7 @@ async def main() -> None:
     # ----------------------------
     # 4. User query
     # ----------------------------
-    query = "phones with good battery life that are under $600"
+    query = "phones with good battery life that are below $600"
 
     tool_request = ToolRequest(
         tool_name=DB_FILTER_TOOL.name,
@@ -89,4 +90,5 @@ async def main() -> None:
 # Run script
 # ----------------------------
 if __name__ == "__main__":
+    print('running')
     asyncio.run(main())

@@ -15,3 +15,4 @@ class WebSearchInfrastructure:
         self.tool = WebSearchTool(search_client)
 
         return self.tool
+    

@@ -47,15 +47,19 @@ class DBFilterTool(ToolPort):
         # 3. Call LLM
         # ----------------------------
         llm_response: LLMResponse = await self.llm_port.generate(prompt)
+        print(llm_response)
         # ----------------------------
         # 4. Parse JSON
         # ----------------------------
         parsed_json: dict[str, Any] = self.json_parser.to_json(llm_response.raw)
+        print(parsed_json)
         # ----------------------------
         # 5. Convert to DBFilter
         # ----------------------------
         db_filter: DBFilter = DBFilter.create(parsed_json)
+        print(db_filter)
         db_query: dict[str, Any] = db_filter.get_db_query()
+        print(db_query)
         # ----------------------------
         # 7. Call database
         # ----------------------------
@@ -67,6 +71,7 @@ class DBFilterTool(ToolPort):
             },
             timeout=settings.http_timeout
         )
+        print(response)
 
         raw_docs = response.require("documents")
 

@@ -46,7 +46,7 @@ def test_db_filter_query_name_only():
     query = f.get_db_query()
 
     assert query == {
-        "name": {
+        "title": {
             "$regex": "shoe",
             "$options": "i"
         }
@@ -80,7 +80,7 @@ def test_db_filter_query_combined():
     query = f.get_db_query()
 
     assert query == {
-        "name": {
+        "title": {
             "$regex": "book",
             "$options": "i"
         },

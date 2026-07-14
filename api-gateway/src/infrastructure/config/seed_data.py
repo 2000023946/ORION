@@ -113,4 +113,15 @@ SEED_DATA: list[dict[str, Any]] = [
         },
         "created_at": datetime.now(timezone.utc),
     },
+    {
+    "_id": "p11",
+    "title": "iphone 7",
+    "content": "Google smartphone with excellent battery life",
+    "price": 499,
+    "metadata": {
+        "category": "phone",
+        "brand": "Google",
+    },
+    "created_at": datetime.now(timezone.utc),
+}
 ]
