@@ -6,7 +6,8 @@ from src.infrastructure.real.http.real_http_client import RealHttpClient
 from src.infrastructure.real.mcp_server.tools.core.tool_information import WEB_SEARCH_TOOL
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
-from src.infrastructure.real.mcp_server.tools.web_search.http_web_search_client import HttpWebSearchClient
+# from src.infrastructure.real.mcp_server.tools.web_search.http_web_search_client import HttpWebSearchClient
+from src.infrastructure.real.mcp_server.tools.web_search.mock_web_search_client import MockWebSearchClient
 from src.infrastructure.real.mcp_server.tools.web_search.web_search_tool import WebSearchTool
 
 """
@@ -17,7 +18,7 @@ and measures the total execution time.
 """
 
 http_client = RealHttpClient()
-web_search_client = HttpWebSearchClient(http_client)
+web_search_client = MockWebSearchClient()
 web_search = WebSearchTool(web_search_client)
 
 query = "Is the stock market up or down today?"

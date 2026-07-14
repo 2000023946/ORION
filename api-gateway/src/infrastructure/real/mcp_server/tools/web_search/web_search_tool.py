@@ -23,7 +23,7 @@ class WebSearchTool(ToolPort):
         # 2. Call external API
         # ----------------------------
         
-        web_search_response = self.web_search_client.search(query=request.query)
+        web_search_response = await self.web_search_client.search(query=request.query)
 
         # ----------------------------
         # 4. Return standardized ToolResponse
