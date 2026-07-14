@@ -9,6 +9,7 @@ from src.domain.tool_name import ToolName
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.infrastructure.real.mcp_server.tools.core.tool_output_registry import ToolOutputRegistry
 from src.infrastructure.real.mcp_server.tools.core.tool_request_factory_registry import ToolRequestFactoryRegistry
+from src.metrics.decorator import measure
 from src.ports.graph_executer_port import GraphExecutorPort
 from src.ports.mcp_server_port import MCPServerPort
 from src.ports.tool_response import ToolResponse
@@ -19,6 +20,7 @@ class RealGraphExecuter(GraphExecutorPort):
     def __init__(self, tool_request_factory_registry: ToolRequestFactoryRegistry):
         self.tool_request_factory_registry = tool_request_factory_registry
 
+    @measure("graph_executor")
     async def execute(
         self,
         query: Query,
@@ -88,7 +90,6 @@ class RealGraphExecuter(GraphExecutorPort):
         context: Context,
         tool_output_registry: ToolOutputRegistry,
     ) -> None:
-        print(f"Executing Node {tool_name.name}")
         # START node
         if tool_name == START_TOOL:
             context.update(
@@ -106,10 +107,8 @@ class RealGraphExecuter(GraphExecutorPort):
             tool_name=tool_name,
             tool_output_registry=tool_output_registry,
         )
-        print("tool request", tool_request.params)
         try:
             tool_response = await mcp_server.call_tool(tool_name, tool_request)
-            print("tool response", tool_response.output)
         except Exception as e:
             tool_response = ToolResponse(
                 tool_name=tool_name,
@@ -121,4 +120,3 @@ class RealGraphExecuter(GraphExecutorPort):
         tool_output_registry.save_response(tool_response)
         context.update(tool_name, tool_response.output)
         
-        print("updated context: ", context.context)

@@ -8,6 +8,7 @@ from src.domain.query import Query
 from src.domain.tool import Tool
 from src.domain.context import Context
 from src.infrastructure.real.mcp_client.planning.prompt_factory_port import PromptFactoryPort
+from src.metrics.decorator import measure
 from src.ports.mcp_client_port import MCPClientPort
 
 from src.domain.tool_edge import ToolEdge
@@ -26,10 +27,10 @@ class RealMCPClient(MCPClientPort):
         self.prompt_factory = prompt_factory
         self.plan_parser = plan_parser
     
+    @measure("mcp_plan")
     async def create_plan(self, query: Query, tools: list[Tool]) -> RetrievalPlan:
         prompt: Prompt = self.prompt_factory.create_plan_prompt(query, tools)
         llm_output: LLMResponse = await self.llm_plan.generate(prompt)
-        print("llm_output", llm_output)
         json_output = llm_output.get_response()
         
         tool_edges: list[ToolEdge] = self.plan_parser.parse(json_output)
@@ -39,7 +40,7 @@ class RealMCPClient(MCPClientPort):
         
         return plan
         
-    
+    @measure("mcp_answer")
     async def answer(self, query: Query, context: Context) -> SearchAnswer:
         prompt = self.prompt_factory.create_answer_prompt(query, context)
 

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware # 1. Import this
 
 from src.components.app import App
+from src.metrics.decorator import measure
 
 
 # -------------------------
@@ -44,7 +45,7 @@ system = App(mock=True)
 # -------------------------
 # API endpoint
 # -------------------------
-
+@measure("search_requeset")
 @app.post("/search", response_model=SearchResponseModel)
 async def search(req: SearchRequest):
     
