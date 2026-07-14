@@ -13,6 +13,7 @@ from src.infrastructure.real.mcp_server.tools.db_filter.db_filter import DBFilte
 from src.infrastructure.real.mcp_server.tools.db_filter.db_filter_request import DBFilterRequest
 from src.infrastructure.real.mcp_server.tools.db_filter.db_filter_response import DBFilterResponse
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
+from src.metrics.decorator import measure
 from src.ports.tool_response import ToolResponse
 
 
@@ -30,6 +31,7 @@ class DBFilterTool(ToolPort):
         self.prompt_factory = prompt_factory
         self.json_parser = json_parser
 
+    @measure("db_filter_tool")
     async def execute(self, tool_request: ToolRequest) -> ToolResponse:
 
         # ----------------------------
@@ -47,19 +49,15 @@ class DBFilterTool(ToolPort):
         # 3. Call LLM
         # ----------------------------
         llm_response: LLMResponse = await self.llm_port.generate(prompt)
-        print(llm_response)
         # ----------------------------
         # 4. Parse JSON
         # ----------------------------
         parsed_json: dict[str, Any] = self.json_parser.to_json(llm_response.raw)
-        print(parsed_json)
         # ----------------------------
         # 5. Convert to DBFilter
         # ----------------------------
         db_filter: DBFilter = DBFilter.create(parsed_json)
-        print(db_filter)
         db_query: dict[str, Any] = db_filter.get_db_query()
-        print(db_query)
         # ----------------------------
         # 7. Call database
         # ----------------------------
@@ -71,7 +69,6 @@ class DBFilterTool(ToolPort):
             },
             timeout=settings.http_timeout
         )
-        print(response)
 
         raw_docs = response.require("documents")
 

@@ -65,7 +65,8 @@ class MockPlanLLM(LLMPort):
 
 
     async def generate(self, prompt: Prompt) -> LLMResponse:
-        await asyncio.sleep(1.0)   # Planner
+        # MCP Planner (currently ~250-600ms)
+        await asyncio.sleep(random.uniform(0.5, 0.8))  # Planner
 
         plan = random.choice(self.plans)
 

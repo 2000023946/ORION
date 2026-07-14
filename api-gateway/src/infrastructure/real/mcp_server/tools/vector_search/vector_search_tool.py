@@ -6,6 +6,7 @@ from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_reques
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_result import VectorSearchResult
 from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKeys
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_store_port import VectorStorePort
+from src.metrics.decorator import measure
 from src.ports.tool_response import ToolResponse
 
 
@@ -15,6 +16,7 @@ class VectorSearchTool(ToolPort):
         self.vector_store = vector_store
         self.embedder = embedder
 
+    @measure("vector_search_tool")
     async def execute(self, tool_request: ToolRequest) -> ToolResponse:
 
         # ----------------------------

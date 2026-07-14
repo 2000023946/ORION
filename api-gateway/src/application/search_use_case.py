@@ -2,6 +2,7 @@ from src.domain.query import Query
 from src.domain.search_answer import SearchAnswer
 from src.application.search_response import SearchResponse
 from src.domain.retrieval_plan import RetrievalPlan
+from src.metrics.decorator import measure
 from src.ports.graph_executer_port import GraphExecutorPort
 from src.domain.context import Context
 from src.domain.tool import Tool
