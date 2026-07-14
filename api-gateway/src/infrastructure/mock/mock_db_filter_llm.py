@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 import re
 
 from src.infrastructure.real.mcp_client.planning.prompt import Prompt
@@ -10,7 +11,7 @@ from src.infrastructure.real.mcp_client.llm.llm_port import LLMPort
 class MockDbFilterLLM(LLMPort):
 
     async def generate(self, prompt: Prompt) -> LLMResponse:
-        await asyncio.sleep(1.0)   # DB Filter LLM
+        await asyncio.sleep(random.uniform(0.2, 0.4))  # DB Filter LLM
 
         text = prompt.prompt.lower()
 

@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>
+Locust Load Test Report
+</title>
+
+
+<style>
+
+
+body {
+
+font-family:
+Arial,
+Helvetica,
+sans-serif;
+
+background:#f4f6f8;
+
+padding:30px;
+
+color:#333;
+
+}
+
+
+.container {
+
+background:white;
+
+padding:30px;
+
+border-radius:10px;
+
+max-width:1200px;
+
+margin:auto;
+
+}
+
+
+
+h1,h2 {
+
+color:#2c3e50;
+
+}
+
+
+
+table {
+
+width:100%;
+
+border-collapse:collapse;
+
+margin-bottom:35px;
+
+}
+
+
+
+th {
+
+background:#34495e;
+
+color:white;
+
+padding:12px;
+
+}
+
+
+
+td {
+
+padding:10px;
+
+border-bottom:1px solid #ddd;
+
+text-align:center;
+
+}
+
+
+
+tr:nth-child(even) {
+
+background:#f9f9f9;
+
+}
+
+
+
+.summary {
+
+background:#eaf6ff;
+
+padding:15px;
+
+border-left:5px solid #3498db;
+
+}
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h1>
+Locust Load Test Report
+</h1>
+
+
+
+<div class="summary">
+
+
+<h2>
+Test Execution Details
+</h2>
+
+
+<p>
+<b>Target Load:</b>
+2000 users
+</p>
+
+
+<p>
+<b>Spawn Rate:</b>
+300.00 users/second
+</p>
+
+
+<p>
+<b>Status:</b>
+Completed
+</p>
+
+
+</div>
+
+
+
+<h2>
+Request Statistics
+</h2>
+
+
+<table>
+
+
+<tr>
+
+<th>Type</th>
+<th>Name</th>
+<th>Requests</th>
+<th>Fails</th>
+<th>Average(ms)</th>
+<th>Min(ms)</th>
+<th>Max(ms)</th>
+<th>Median(ms)</th>
+<th>Req/s</th>
+<th>Failures/s</th>
+
+</tr>
+
+
+
+<tr>
+
+<td>POST</td>
+
+<td>/search</td>
+
+<td>9474</td>
+
+<td>174 (1.84%)</td>
+
+<td>20772</td>
+
+<td>7299</td>
+
+<td>33952</td>
+
+<td>21000</td>
+
+<td>79.09</td>
+
+<td>1.45</td>
+
+</tr>
+
+
+</table>
+
+
+
+
+
+<h2>
+Response Time Percentiles
+</h2>
+
+
+<table>
+
+
+<tr>
+
+<th>50%</th>
+<th>66%</th>
+<th>75%</th>
+<th>80%</th>
+<th>90%</th>
+<th>95%</th>
+<th>98%</th>
+<th>99%</th>
+<th>99.9%</th>
+<th>99.99%</th>
+<th>100%</th>
+
+</tr>
+
+
+<tr>
+
+<td>22000 ms</td>
+
+<td>22000 ms</td>
+
+<td>24000 ms</td>
+
+<td>25000 ms</td>
+
+<td>27000 ms</td>
+
+<td>28000 ms</td>
+
+<td>33000 ms</td>
+
+<td>34000 ms</td>
+
+<td>34000 ms</td>
+
+<td>N/A ms</td>
+
+<td>9474 ms</td>
+
+</tr>
+
+
+</table>
+
+
+
+
+
+<h2>
+Component Performance
+</h2>
+
+
+<table>
+
+
+<tr>
+
+<th>
+Component
+</th>
+
+<th>
+Average Latency(ms)
+</th>
+
+<th>
+Memory(MB)
+</th>
+
+
+</tr>
+
+
+
+
+
+</table>
+
+
+
+
+</div>
+
+
+</body>
+
+
+</html>
+

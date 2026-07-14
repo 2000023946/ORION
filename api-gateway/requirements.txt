@@ -12,8 +12,18 @@ faiss-cpu
 
 pytest
 
+plotly
+
 pytest-asyncio
 
 pytest-cov
 
 locust
+
+
+prometheus-fastapi-instrumentator
+
+prometheus-client
+
+matplotlib 
+pandas

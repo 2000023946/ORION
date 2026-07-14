@@ -1,11 +1,48 @@
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI # type: ignore
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware # 1. Import this
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.components.app import App
-from src.metrics.decorator import measure, collector
+from src.metrics.decorator import measure
+
+from prometheus_client import make_asgi_app
+
+
+# -------------------------
+# FastAPI app
+# -------------------------
+
+app = FastAPI(title="MCP DAG Agent")
+
+
+# -------------------------
+# CORS
+# -------------------------
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# -------------------------
+# Prometheus metrics endpoint
+# -------------------------
+
+metrics_app = make_asgi_app()
+
+app.mount(
+    "/metrics",
+    metrics_app
+)
+# initialize system once (composition root)
+system = App(mock=True)
+
 
 
 # -------------------------
@@ -22,26 +59,6 @@ class SearchResponseModel(BaseModel):
     error: str | None = None
     metadata: dict[str, Any] | None = None
 
-
-# -------------------------
-# FastAPI app
-# -------------------------
-
-app = FastAPI(title="MCP DAG Agent")
-
-# 2. Add the CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # In production, replace "*" with your frontend URL (e.g., "http://localhost:3000")
-    allow_credentials=True,
-    allow_methods=["*"], # This allows GET, POST, OPTIONS, etc.
-    allow_headers=["*"], # This allows all headers like Content-Type
-)
-
-# initialize system once (composition root)
-system = App(mock=True)
-
-
 # -------------------------
 # API endpoint
 # -------------------------
@@ -56,13 +73,5 @@ async def search(req: SearchRequest):
         error=result.error,
         metadata=result.metadata
     )
-    
-@app.on_event("shutdown") # type: ignore
-def save_metrics():
-
-    collector.export_csv(
-        "baseline_metrics.csv"
-    )
-
     
     

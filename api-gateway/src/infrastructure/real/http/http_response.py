@@ -12,9 +12,7 @@ class HttpResponse:
         return self.body.get(key, default)
 
     def require(self, key: str) -> Any:
-        print(self.body)
         if key not in self.body:
-            print("missing key", key)
             raise KeyError(f"Missing required key: {key}")
         return self.body[key]
 
