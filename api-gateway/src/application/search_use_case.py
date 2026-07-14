@@ -29,10 +29,8 @@ class SearchUseCase:
 
             # 2. LLM creates DAG-based retrieval plan
             plan: RetrievalPlan = await self.mcp_client.create_plan(query, tools)
-
             # 3. execute DAG (PARALLEL + dependency-aware)
             context: Context = await self.graph_executor.execute(query, plan, self.mcp_server)
-
             # 4. synthesize final answer
             answer: SearchAnswer = await self.mcp_client.answer(
                 query=query,

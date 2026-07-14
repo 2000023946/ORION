@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package graphexecutor;
+
+// -------------------------------------------------
+// 1. THE SERVICE CONTRACT
+// -------------------------------------------------
+service GraphExecutorService {
+    // The main entry point that maps to your execute() method
+    rpc ExecutePlan (ExecutionRequest) returns (ExecutionResponse) {}
+}
+
+// -------------------------------------------------
+// 2. THE REQUEST (Inputs)
+// -------------------------------------------------
+message ExecutionRequest {
+    // Assuming your Query domain object wraps a string text
+    string query_text = 1; 
+    
+    // The plan is just a list of edges. 
+    RetrievalPlan plan = 2;
+}
+
+message RetrievalPlan {
+    // 'repeated' means a list/array in Protobuf
+    repeated ToolEdge edges = 1;
+}
+
+message ToolEdge {
+    // We use strings here to represent ToolName.name
+    string source = 1;
+    string to = 2;
+}
+
+// -------------------------------------------------
+// 3. THE RESPONSE (Output)
+// -------------------------------------------------
+message ExecutionResponse {
+    Context context = 1;
+}
+
+message Context {
+    // Protobuf requires strict typing, so mapping a string to 'Any' 
+    // is intentionally difficult to prevent runtime parsing errors.
+    // The safest, most robust way to handle dynamic tool outputs is to 
+    // map the ToolName to a JSON-serialized string of the output.
+    map<string, string> data = 1;
+}

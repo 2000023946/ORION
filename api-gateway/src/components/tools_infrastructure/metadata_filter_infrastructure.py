@@ -1,5 +1,5 @@
 from src.infrastructure.real.mcp_server.tools.metadata_filter.metadata_filter_tool import MetadataFilterTool
-
+import pymongo.errors
 
 class MetadataFilterInfrastructure:
     def __init__(self):
@@ -15,7 +15,10 @@ class MetadataFilterInfrastructure:
 
         # seed DB
         seeder = MongoSeeder()
-        seeder.reset_and_seed(SEED_DATA)
+        try:
+            seeder.reset_and_seed(SEED_DATA)
+        except pymongo.errors.BulkWriteError as e:
+            print("[MongoDB] Database already seeded. Skipping initialization.")
 
         self.http_client = MongoHttpClient(
             uri=settings.metadata_db_url,

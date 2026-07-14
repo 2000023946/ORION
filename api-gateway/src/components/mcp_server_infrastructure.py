@@ -8,7 +8,7 @@ from src.infrastructure.real.mcp_server.tools.core.tool_information_registry imp
 from src.infrastructure.real.mcp_server.tools.core.tool_registry_port import ToolRegistryPort
 
 class MCPServerInfrastructure:
-    def __init__(self):
+    def __init__(self, mock: bool = False):
         # Register tool metadata
         tool_information_registry = ToolInformationRegistry()
         tool_information_registry.register(VECTOR_SEARCH_TOOL.name, VECTOR_SEARCH_TOOL)
@@ -38,6 +38,11 @@ class MCPServerInfrastructure:
             tool_registry_port=tool_registry,
             tool_information_registry=tool_information_registry,
         )
+        
+        if mock:
+            self.use_mock()
+        else:
+            self.use_real()
         
     def use_mock(self):
         self.web_search_infra.use_mock()

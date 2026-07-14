@@ -27,3 +27,8 @@ prometheus-client
 
 matplotlib 
 pandas
+
+grpcio
+
+grpcio-tools 
+protobuf

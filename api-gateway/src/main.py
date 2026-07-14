@@ -65,7 +65,6 @@ class SearchResponseModel(BaseModel):
 @measure("search_requeset")
 @app.post("/search", response_model=SearchResponseModel)
 async def search(req: SearchRequest):
-    
     result = await system.run(req.query)
     return SearchResponseModel(
         success=result.success,
