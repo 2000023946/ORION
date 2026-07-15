@@ -1,7 +1,0 @@
-timestamp,component,avg_latency_ms,memory_mb
-2026-07-15T14:55:30.161041,mcp_plan,621.95,0.02
-2026-07-15T14:55:30.178935,mcp_answer,1196.86,0.31
-2026-07-15T14:55:30.198739,graph_executor,1111.67,0.0
-2026-07-15T14:55:30.216474,vector_search_tool,inf,0.16
-2026-07-15T14:55:30.233596,metadata_filter_tool,inf,0.02
-2026-07-15T14:55:30.246993,web_search_tool,nan,0.01

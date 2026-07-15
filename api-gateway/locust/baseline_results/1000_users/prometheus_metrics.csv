@@ -1,0 +1,6 @@
+timestamp,component,avg_latency_ms,memory_mb
+2026-07-15T15:05:19.760259,db_filter_tool,278.47,0.0
+2026-07-15T15:05:19.963120,graph_executor,810.78,0.0
+2026-07-15T15:05:20.155478,vector_search_tool,79.05,0.16
+2026-07-15T15:05:20.376958,metadata_filter_tool,5.23,0.01
+2026-07-15T15:05:20.581729,web_search_tool,1372.67,0.0
