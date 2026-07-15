@@ -11,7 +11,7 @@ class TeiEmbeddingAdapter(EmbeddingPort):
     Adapter for the official Hugging Face Text Embeddings Inference (TEI) image.
     Uses standard HTTP REST calls to communicate with the Rust backend.
     """
-    def __init__(self, target_url: str = "http://localhost:8080"):
+    def __init__(self, target_url):
         # Defensive check: Ensure the URL starts with http:// or https://
         if not target_url.startswith(("http://", "https://")):
             target_url = f"http://{target_url}"

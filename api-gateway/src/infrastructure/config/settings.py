@@ -7,7 +7,7 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class Settings:
-    embedding_target_address: str = os.getenv("EMBEDDING_TARGET_ADDRESS", "localhost:50052")
+    embedding_target_address: str = os.getenv("EMBEDDING_TARGET_ADDRESS", "http://orion-embedding:80")
     executor_target_address: str = os.getenv("EXECUTOR_TARGET_ADDRESS", "executor-microservice:50051")
     # ----------------------------
     # LLM

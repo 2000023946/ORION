@@ -22,9 +22,7 @@ services:
   # gRPC Executor Microservice (NEW)
   # -------------------------
   executor-microservice:
-    build: 
-      context: ./api-gateway
-      dockerfile: dockerfile.executor
+    image: 2000023946/orion-executor:latest
     container_name: orion-executor
     ports:
       - "50051:50051"
@@ -33,9 +31,10 @@ services:
         condition: service_healthy
     environment:
       # Executor does the heavy lifting, so it gets the DB and Tool API keys
-      MONGO_URL: ${MONGO_URL}
+      METADATA_DB_URL: mongodb://host.docker.internal:27017
       WEB_API_KEY: ${WEB_API_KEY}
       LLM_API_KEY: ${LLM_API_KEY} # (If your tools need the LLM too)
+      EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
     restart: unless-stopped
 
   # -------------------------
@@ -56,7 +55,6 @@ services:
       LLM_API_KEY: ${LLM_API_KEY}
       # Best Practice: Pass the gRPC address as an env variable!
       EXECUTOR_TARGET_ADDRESS: ${EXECUTOR_TARGET_ADDRESS}
-      METADATA_DB_URL: ${METADATA_DB_URL}
     restart: unless-stopped
 
 

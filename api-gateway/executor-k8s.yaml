@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orion-executor
+  labels:
+    app: orion-executor
+spec:
+  replicas: 2 # Start with a baseline of 2 pods
+  selector:
+    matchLabels:
+      app: orion-executor
+  template:
+    metadata:
+      labels:
+        app: orion-executor
+    spec:
+      containers:
+      - name: executor
+        image: 2000023946/orion-executor:latest
+        imagePullPolicy: Always # Ensures K8s always pulls your newest push
+        ports:
+        - containerPort: 50051
+        env:
+        # K8s Internal DNS routing (assuming you name your other services this way)
+        - name: METADATA_DB_URL
+          value: "mongodb://orion-mongodb:27017"
+        - name: EMBEDDING_TARGET_ADDRESS
+          value: "http://orion-embedding:80"
+        # We will use a K8s Secret for your API keys
+        envFrom:
+        - secretRef:
+            name: orion-secrets
+            optional: true
+        # CRITICAL: HPA requires these resource limits to calculate scaling!
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orion-executor
+spec:
+  selector:
+    app: orion-executor
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: orion-executor-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: orion-executor
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Scale up if average CPU hits 70%
