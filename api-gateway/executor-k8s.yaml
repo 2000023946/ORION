@@ -19,19 +19,20 @@ spec:
         image: 2000023946/orion-executor:latest
         imagePullPolicy: Always # Ensures K8s always pulls your newest push
         ports:
-        - containerPort: 50051
+          - containerPort: 50051
+            name: grpc
+          - containerPort: 8000   # Exposes metrics inside the container
+            name: metrics
         env:
-        # K8s Internal DNS routing (assuming you name your other services this way)
+        # K8s Internal DNS routing
         - name: METADATA_DB_URL
           value: "mongodb://orion-mongodb:27017"
         - name: EMBEDDING_TARGET_ADDRESS
           value: "http://orion-embedding:80"
-        # We will use a K8s Secret for your API keys
         envFrom:
         - secretRef:
             name: orion-secrets
             optional: true
-        # CRITICAL: HPA requires these resource limits to calculate scaling!
         resources:
           requests:
             cpu: "100m"
@@ -48,9 +49,14 @@ spec:
   selector:
     app: orion-executor
   ports:
-    - protocol: TCP
+    - name: grpc              # Added explicit port naming for clarity
+      protocol: TCP
       port: 50051
       targetPort: 50051
+    - name: metrics           # <--- FIXED: Open the network routing door for Prometheus
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

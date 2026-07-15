@@ -53,8 +53,10 @@ services:
     environment:
       # Gateway needs the LLM key to generate the RetrievalPlan
       LLM_API_KEY: ${LLM_API_KEY}
+      METADATA_DB_URL: mongodb://host.docker.internal:27017
+      EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
       # Best Practice: Pass the gRPC address as an env variable!
-      EXECUTOR_TARGET_ADDRESS: ${EXECUTOR_TARGET_ADDRESS}
+      EXECUTOR_TARGET_ADDRESS: http://host.docker.internal:50051
     restart: unless-stopped
 
 

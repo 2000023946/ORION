@@ -22,4 +22,5 @@ COPY . .
 EXPOSE 8000
 
 # Default command (adjust if your entrypoint is different)
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# In your Dockerfile or startup script:
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
