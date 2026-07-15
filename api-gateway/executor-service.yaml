@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: executor-microservice # Matches your EXECUTOR_TARGET_ADDRESS env variable
+spec:
+  selector:
+    app: orion-executor # Routes traffic to any pod with this label
+  ports:
+    - protocol: TCP
+      port: 50051       # Port the service listens on
+      targetPort: 50051 # Port your Python gRPC container listens on
+  type: ClusterIP       # Internal-only IP (completely secure from outside world)

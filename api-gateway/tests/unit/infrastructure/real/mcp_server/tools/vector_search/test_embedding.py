@@ -1,7 +1,7 @@
 import pytest  # type: ignore
 import dataclasses
 
-from src.infrastructure.real.mcp_server.tools.vector_search.embedding import Embedding
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.embedding import Embedding
 
 
 

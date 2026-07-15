@@ -1,3 +1,4 @@
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.tei_embedding_adapter import TeiEmbeddingAdapter
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_tool import VectorSearchTool
 
 
@@ -12,13 +13,13 @@ class VectorSearchInfrasture:
         from src.infrastructure.config.seed_data import SEED_DATA
         from src.infrastructure.config.vector_seeder import VectorSeeder
         from src.infrastructure.real.mcp_server.tools.vector_search.faiss_vector_store import FaissVectorStore
-        from src.infrastructure.real.mcp_server.tools.vector_search.sentence_transformer_embedding import SentenceTransformerEmbedding
+        from src.infrastructure.real.mcp_server.tools.vector_search.embedding.sentence_transformer_embedding import SentenceTransformerEmbedding
         from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_tool import VectorSearchTool
 
         self.vector_store = FaissVectorStore(dim=settings.vector_db_dim)
 
-        self.embedder = SentenceTransformerEmbedding(
-            model_name=settings.embedding_model
+        self.embedder = TeiEmbeddingAdapter(
+            target_url=settings.embedding_target_address
         )
 
         seeder = VectorSeeder(

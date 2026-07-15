@@ -10,7 +10,7 @@ from src.infrastructure.real.mcp_server.tools.core.tool_io_keys import ToolIOKey
 from src.infrastructure.real.mcp_server.tools.core.tool_request import ToolRequest
 
 from src.infrastructure.real.mcp_server.tools.vector_search.faiss_vector_store import FaissVectorStore
-from src.infrastructure.real.mcp_server.tools.vector_search.sentence_transformer_embedding import SentenceTransformerEmbedding
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.sentence_transformer_embedding import SentenceTransformerEmbedding
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_tool import VectorSearchTool
 
 

@@ -1,10 +1,10 @@
+from src.infrastructure.config.settings import settings
 from src.infrastructure.real.graph_executor.grpc_graph_executor import GrpcGraphExecutor
 from src.infrastructure.real.graph_executor.real_graph_executor import RealGraphExecuter
 from src.infrastructure.real.mcp_server.tools.core.docs_ids_request_factory import DocsIdsRequestFactory
 from src.infrastructure.real.mcp_server.tools.core.query_request_factory import QueryRequestFactory
 from src.infrastructure.real.mcp_server.tools.core.tool_information import DB_FILTER_TOOL, METADATA_FILTER_TOOL, VECTOR_SEARCH_TOOL, WEB_SEARCH_TOOL
 from src.infrastructure.real.mcp_server.tools.core.tool_request_factory_registry import ToolRequestFactoryRegistry
-
 
 class GraphExecutorInfrastructure:
     def __init__(self, is_grpc: bool = True):
@@ -21,7 +21,7 @@ class GraphExecutorInfrastructure:
         
         self.real_graph_executor = RealGraphExecuter(request_registery)
         
-        self.grpc_graph_executor = GrpcGraphExecutor(target_address='localhost:50051')
+        self.grpc_graph_executor = GrpcGraphExecutor(target_address=settings.executor_target_address)
         
         if is_grpc:
             self.graph_executor = self.grpc_graph_executor

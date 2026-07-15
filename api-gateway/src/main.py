@@ -65,6 +65,7 @@ class SearchResponseModel(BaseModel):
 @measure("search_requeset")
 @app.post("/search", response_model=SearchResponseModel)
 async def search(req: SearchRequest):
+    print("comuniting to executor the name of ", system.graph_executor_infras.grpc_graph_executor.target_address)
     result = await system.run(req.query)
     return SearchResponseModel(
         success=result.success,

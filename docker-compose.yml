@@ -18,24 +18,62 @@ services:
       timeout: 5s
       retries: 5
 
+  # -------------------------
+  # gRPC Executor Microservice (NEW)
+  # -------------------------
+  executor-microservice:
+    build: 
+      context: ./api-gateway
+      dockerfile: dockerfile.executor
+    container_name: orion-executor
+    ports:
+      - "50051:50051"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # Executor does the heavy lifting, so it gets the DB and Tool API keys
+      MONGO_URL: ${MONGO_URL}
+      WEB_API_KEY: ${WEB_API_KEY}
+      LLM_API_KEY: ${LLM_API_KEY} # (If your tools need the LLM too)
+    restart: unless-stopped
 
   # -------------------------
   # Backend (MCP API Gateway)
   # -------------------------
   api:
-    build: ./api-gateway
+    build: 
+      context: ./api-gateway
+      dockerfile: dockerfile
     container_name: orion-api
     ports:
       - "8000:8000"
     depends_on:
-      mongodb:
-        condition: service_healthy
+      # Gateway now waits for the Executor to boot up, not the DB
+      - executor-microservice
     environment:
-      MONGO_URL: mongodb://mongodb:27017
+      # Gateway needs the LLM key to generate the RetrievalPlan
       LLM_API_KEY: ${LLM_API_KEY}
-      WEB_API_KEY: ${WEB_API_KEY}
+      # Best Practice: Pass the gRPC address as an env variable!
+      EXECUTOR_TARGET_ADDRESS: ${EXECUTOR_TARGET_ADDRESS}
+      METADATA_DB_URL: ${METADATA_DB_URL}
     restart: unless-stopped
 
+
+  # -------------------------
+  # Text Embeddings Inference (Hugging Face Official)
+  # -------------------------
+  embedding-service:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
+    container_name: orion-embedding
+    # Tell TEI exactly which model to download and serve
+    command: --model-id sentence-transformers/all-MiniLM-L6-v2
+    ports:
+      - "8080:80"
+    volumes:
+      # CRITICAL: Cache the model weights so it doesn't download 90MB on every restart
+      - huggingface_data:/data 
+    restart: unless-stopped
 
   # -------------------------
   # Frontend (Vite + React)
@@ -50,7 +88,6 @@ services:
     environment:
       VITE_API_URL: http://localhost:8000
     restart: unless-stopped
-
 
   # -------------------------
   # Prometheus Monitoring
@@ -67,10 +104,10 @@ services:
       - api
     restart: unless-stopped
 
-
 # -------------------------
 # Persistent Storage
 # -------------------------
 volumes:
   mongo_data:
   prometheus_data:
+  huggingface_data:

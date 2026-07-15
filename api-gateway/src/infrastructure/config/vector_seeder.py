@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 
-from src.infrastructure.real.mcp_server.tools.vector_search.embedding_port import EmbeddingPort
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.embedding_port import EmbeddingPort
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_store_port import VectorStorePort
 
 

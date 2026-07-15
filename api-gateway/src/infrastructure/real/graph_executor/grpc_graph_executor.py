@@ -15,7 +15,7 @@ from src.ports.mcp_server_port import MCPServerPort
 
 
 class GrpcGraphExecutor(GraphExecutorPort):
-    def __init__(self, target_address: str = 'localhost:50051'):
+    def __init__(self, target_address: str):
         self.target_address = target_address
 
     async def execute(

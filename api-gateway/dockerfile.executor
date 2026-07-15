@@ -1,0 +1,27 @@
+# Use a lightweight, modern Python base image
+FROM python:3.14-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Prevent Python from writing .pyc files and force stdout/stderr to be unbuffered
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Copy dependency files first to leverage Docker layer caching
+# (Assuming you have a requirements.txt. If you use Pipfile/Poetry, adjust accordingly)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the entire source code into the container
+COPY src/ /app/src/
+
+# CRITICAL: Replicate the exact PYTHONPATH environment variable so your absolute imports work
+ENV PYTHONPATH=/app
+
+# Expose the gRPC port we configured in the server script
+EXPOSE 50051
+
+# Run the server using the exact module command that worked locally
+CMD ["python3", "-m", "src.infrastructure.real.graph_executor.grpc_graph_executor_service"]
+

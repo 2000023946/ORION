@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orion-executor
+  labels:
+    app: orion-executor
+spec:
+  replicas: 2 # Start with 2 base replicas for high availability
+  selector:
+    matchLabels:
+      app: orion-executor
+  template:
+    metadata:
+      labels:
+        app: orion-executor
+    spec:
+      containers:
+      - name: executor
+        image: your_dockerhub_username/orion-executor-service:latest  # <-- Update this
+        imagePullPolicy: Always                                      # <-- Change to Always
+        ports:
+        - containerPort: 50051
+        env:
+        - name: MONGO_URL
+          value: "mongodb://orion-mongodb:27017" # Internal K8s DNS for Mongo
+        - name: WEB_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: orion-secrets
+              key: web-api-key
+        # --- CRITICAL FOR AUTOSCALING ---
+        resources:
+          requests:
+            cpu: "100m"     # 100 milli-CPUs (0.1 cores). HPA scales relative to this!
+            memory: "128Mi" # 128 Megabytes
+          limits:
+            cpu: "500m"     # Upper bound (0.5 cores) to prevent runaway loops
+            memory: "512Mi" # Upper bound

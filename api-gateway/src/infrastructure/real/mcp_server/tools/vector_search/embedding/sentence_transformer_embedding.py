@@ -3,7 +3,7 @@ from typing import List, Any
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
-from src.infrastructure.real.mcp_server.tools.vector_search.embedding_port import EmbeddingPort
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.embedding_port import EmbeddingPort
 
 
 

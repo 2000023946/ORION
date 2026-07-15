@@ -1,7 +1,7 @@
 import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
 
-from src.infrastructure.real.mcp_server.tools.vector_search.sentence_transformer_embedding import (
+from src.infrastructure.real.mcp_server.tools.vector_search.embedding.sentence_transformer_embedding import (
     SentenceTransformerEmbedding,
 )
 
