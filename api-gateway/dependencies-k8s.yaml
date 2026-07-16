@@ -133,3 +133,54 @@ spec:
       - name: config-volume
         configMap:
           name: prometheus-config
+
+---
+# ==========================================
+# 4. Qdrant Vector Database
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orion-qdrant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orion-qdrant
+  template:
+    metadata:
+      labels:
+        app: orion-qdrant
+    spec:
+      containers:
+      - name: qdrant
+        image: qdrant/qdrant:latest
+        ports:
+        - containerPort: 6333
+          name: http
+        - containerPort: 6334
+          name: grpc
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "512Mi"  # Lowered so Minikube can actually schedule it
+          limits:
+            cpu: "1"
+            memory: "4Gi"    # Safe ceiling for local testing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orion-qdrant
+spec:
+  selector:
+    app: orion-qdrant
+  ports:
+    - name: http
+      protocol: TCP
+      port: 6333
+      targetPort: 6333
+    - name: grpc
+      protocol: TCP
+      port: 6334
+      targetPort: 6334

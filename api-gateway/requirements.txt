@@ -9,6 +9,8 @@ pymongo
 faiss-cpu
 
 
+qdrant-client
+
 pytest
 
 plotly

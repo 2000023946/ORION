@@ -19,7 +19,26 @@ services:
       retries: 5
 
   # -------------------------
-  # gRPC Executor Microservice (NEW)
+  # Qdrant Vector Database (NEW Enterprise Data Plane)
+  # -------------------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: orion-qdrant
+    ports:
+      - "6333:6333" # HTTP REST API
+      - "6334:6334" # gRPC API
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 4G
+
+  # -------------------------
+  # gRPC Executor Microservice
   # -------------------------
   executor-microservice:
     image: 2000023946/orion-executor:latest
@@ -29,12 +48,15 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+      qdrant:
+        condition: service_started
     environment:
-      # Executor does the heavy lifting, so it gets the DB and Tool API keys
       METADATA_DB_URL: mongodb://host.docker.internal:27017
-      WEB_API_KEY: ${WEB_API_KEY}
-      LLM_API_KEY: ${LLM_API_KEY} # (If your tools need the LLM too)
+      QDRANT_TARGET_ADDRESS: http://host.docker.internal:6333
+      # FIX: Must use 8080, because that is the port mapped to the host!
       EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
+      WEB_API_KEY: ${WEB_API_KEY}
+      LLM_API_KEY: ${LLM_API_KEY}
     restart: unless-stopped
 
   # -------------------------
@@ -48,17 +70,15 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      # Gateway now waits for the Executor to boot up, not the DB
       - executor-microservice
     environment:
-      # Gateway needs the LLM key to generate the RetrievalPlan
       LLM_API_KEY: ${LLM_API_KEY}
       METADATA_DB_URL: mongodb://host.docker.internal:27017
+      QDRANT_TARGET_ADDRESS: http://host.docker.internal:6333
       EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
-      # Best Practice: Pass the gRPC address as an env variable!
-      EXECUTOR_TARGET_ADDRESS: http://host.docker.internal:50051
+      # FIX: gRPC requires no http:// prefix
+      EXECUTOR_TARGET_ADDRESS: host.docker.internal:50051
     restart: unless-stopped
-
 
   # -------------------------
   # Text Embeddings Inference (Hugging Face Official)
@@ -66,12 +86,10 @@ services:
   embedding-service:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-latest
     container_name: orion-embedding
-    # Tell TEI exactly which model to download and serve
     command: --model-id sentence-transformers/all-MiniLM-L6-v2
     ports:
       - "8080:80"
     volumes:
-      # CRITICAL: Cache the model weights so it doesn't download 90MB on every restart
       - huggingface_data:/data 
     restart: unless-stopped
 
@@ -86,6 +104,7 @@ services:
     depends_on:
       - api
     environment:
+      # (Frontend actually runs in your Mac browser, so localhost is correct here)
       VITE_API_URL: http://localhost:8000
     restart: unless-stopped
 
@@ -105,9 +124,10 @@ services:
     restart: unless-stopped
 
 # -------------------------
-# Persistent Storage
+# Persistent Storage Volumes
 # -------------------------
 volumes:
   mongo_data:
+  qdrant_data:
   prometheus_data:
   huggingface_data:

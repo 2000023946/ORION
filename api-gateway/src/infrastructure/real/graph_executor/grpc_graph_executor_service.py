@@ -43,7 +43,7 @@ class GrpcGraphExecutorServicer(executor_pb2_grpc.GraphExecutorServiceServicer):
                 mcp_server=self.mcp_server
             )
         except Exception as e:
-            context.abort(grpc.StatusCode.INTERNAL, f"Graph execution failed: {str(e)}")
+            await context.abort(grpc.StatusCode.INTERNAL, f"Graph execution failed: {str(e)}")
             
         # 3. Pack Domain Objects -> Protobuf
         clean_context_dict = final_context.to_dict()

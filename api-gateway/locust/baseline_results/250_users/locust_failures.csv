@@ -1,1 +1,2 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,/search,RemoteDisconnected('Remote end closed connection without response'),72,2026-07-16T03:03:05Z,2026-07-16T03:03:05Z

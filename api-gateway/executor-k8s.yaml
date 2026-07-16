@@ -5,7 +5,7 @@ metadata:
   labels:
     app: orion-executor
 spec:
-  replicas: 2 # Start with a baseline of 2 pods
+  replicas: 2
   selector:
     matchLabels:
       app: orion-executor
@@ -17,22 +17,28 @@ spec:
       containers:
       - name: executor
         image: 2000023946/orion-executor:latest
-        imagePullPolicy: Always # Ensures K8s always pulls your newest push
+        imagePullPolicy: Always
         ports:
           - containerPort: 50051
             name: grpc
-          - containerPort: 8000   # Exposes metrics inside the container
+          - containerPort: 8000
             name: metrics
         env:
-        # K8s Internal DNS routing
         - name: METADATA_DB_URL
           value: "mongodb://orion-mongodb:27017"
         - name: EMBEDDING_TARGET_ADDRESS
           value: "http://orion-embedding:80"
-        envFrom:
-        - secretRef:
-            name: orion-secrets
-            optional: true
+        - name: QDRANT_TARGET_ADDRESS
+          value: "http://orion-qdrant:6333"
+          
+        # ==========================================
+        # MOCK KEYS: Prevents Python KeyErrors on boot
+        # ==========================================
+        - name: LLM_API_KEY
+          value: "mock_llm_key_local_testing"
+        - name: WEB_API_KEY
+          value: "mock_web_key_local_testing"
+          
         resources:
           requests:
             cpu: "100m"
@@ -49,11 +55,11 @@ spec:
   selector:
     app: orion-executor
   ports:
-    - name: grpc              # Added explicit port naming for clarity
+    - name: grpc
       protocol: TCP
       port: 50051
       targetPort: 50051
-    - name: metrics           # <--- FIXED: Open the network routing door for Prometheus
+    - name: metrics
       protocol: TCP
       port: 8000
       targetPort: 8000
@@ -68,11 +74,11 @@ spec:
     kind: Deployment
     name: orion-executor
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 2
   metrics:
   - type: Resource
     resource:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 70 # Scale up if average CPU hits 70%
+        averageUtilization: 70

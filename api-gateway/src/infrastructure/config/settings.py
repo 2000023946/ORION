@@ -38,7 +38,7 @@ class Settings:
     vector_db_type: str = os.getenv("VECTOR_DB_TYPE", "faiss")
 
     vector_db_api_key: str = os.getenv("VECTOR_DB_API_KEY", "")
-    vector_db_url: str = os.getenv("VECTOR_DB_URL", "")
+    qdrant_target_address: str = os.getenv("QDRANT_TARGET_ADDRESS", "")
     vector_db_index: str = os.getenv("VECTOR_DB_INDEX", "main-index")
 
     vector_top_k: int = int(os.getenv("VECTOR_TOP_K", 3))

@@ -27,7 +27,8 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: 2000023946/api-gateway:latest
+        image: 2000023946/orion-api:latest # Updated to match your Docker Hub tag!
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         # The HPA requires these requests/limits to calculate CPU percentages
@@ -45,6 +46,12 @@ spec:
             value: "http://orion-embedding:80"
           - name: EXECUTOR_TARGET_ADDRESS
             value: "orion-executor:50051"
+          
+          # ==========================================
+          # NEW: Enterprise Vector Store Connection
+          # ==========================================
+          - name: QDRANT_TARGET_ADDRESS
+            value: "http://orion-qdrant:6333" 
 ---
 # The Autoscaler configuration
 apiVersion: autoscaling/v2
@@ -57,7 +64,7 @@ spec:
     kind: Deployment
     name: api-gateway
   minReplicas: 1
-  maxReplicas: 5 # Will clone up to 5 pods under heavy load
+  maxReplicas: 1 # Will clone up to 5 pods under heavy load
   metrics:
   - type: Resource
     resource:

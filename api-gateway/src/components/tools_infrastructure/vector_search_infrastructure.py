@@ -1,4 +1,5 @@
 from src.infrastructure.real.mcp_server.tools.vector_search.embedding.tei_embedding_adapter import TeiEmbeddingAdapter
+from src.infrastructure.real.mcp_server.tools.vector_search.qdrant_vector_store_adapter import QdrantVectorStoreAdapter
 from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_tool import VectorSearchTool
 
 
@@ -15,7 +16,7 @@ class VectorSearchInfrasture:
         from src.infrastructure.real.mcp_server.tools.vector_search.faiss_vector_store import FaissVectorStore
         from src.infrastructure.real.mcp_server.tools.vector_search.vector_search_tool import VectorSearchTool
 
-        self.vector_store = FaissVectorStore(dim=settings.vector_db_dim)
+        self.vector_store = QdrantVectorStoreAdapter(url=settings.qdrant_target_address)
 
         self.embedder = TeiEmbeddingAdapter(
             target_url=settings.embedding_target_address
