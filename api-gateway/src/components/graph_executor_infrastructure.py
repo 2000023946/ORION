@@ -21,10 +21,7 @@ class GraphExecutorInfrastructure:
         
         self.real_graph_executor = RealGraphExecuter(request_registery)
         
-        self.grpc_graph_executor = GrpcGraphExecutor(target_address=settings.executor_target_address)
+        self.graph_executor = self.real_graph_executor
         
-        if is_grpc:
-            self.graph_executor = self.grpc_graph_executor
-        else:
-            self.graph_executor = self.real_graph_executor
+
         

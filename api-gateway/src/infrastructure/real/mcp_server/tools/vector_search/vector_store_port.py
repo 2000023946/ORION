@@ -4,21 +4,21 @@ from typing import List, Dict, Any
 
 class VectorStorePort(ABC):
     """
-    Abstract interface for vector search backends.
+    Abstract interface for asynchronous vector search backends.
     """
 
     @abstractmethod
-    def add(self, doc_id: str, vector: List[float]) -> None:
+    async def add(self, doc_id: str, vector: List[float]) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def add_batch(self, doc_ids: List[str], vectors: List[List[float]]) -> None:
+    async def add_batch(self, doc_ids: List[str], vectors: List[List[float]]) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def search(
+    async def search(
         self,
-        query_vector: List[float],
+        query_vector: Any,  # 'Any' allows the adapter to catch and convert Numpy arrays
         k: int = 5
     ) -> List[Dict[str, Any]]:
         """
@@ -33,7 +33,7 @@ class VectorStorePort(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    def reset(self) -> None:
+    async def reset(self) -> None:
         """
         Clears all stored vectors and state.
         """

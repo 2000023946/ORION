@@ -38,7 +38,8 @@ spec:
           value: "mock_llm_key_local_testing"
         - name: WEB_API_KEY
           value: "mock_web_key_local_testing"
-          
+        - name: BUS_TARGET_ADDRESS
+          value: "redis://orion-redis:6379/0"
         resources:
           requests:
             cpu: "100m"

@@ -1,2 +1,4 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,RemoteDisconnected('Remote end closed connection without response'),72,2026-07-16T03:03:05Z,2026-07-16T03:03:05Z
+POST,/search,"ConnectionResetError(54, 'Connection reset by peer')",494,2026-07-16T20:59:40Z,2026-07-16T21:00:50Z
+POST,/search,RemoteDisconnected('Remote end closed connection without response'),263,2026-07-16T20:59:08Z,2026-07-16T20:59:37Z
+POST,/search,HTTPError('500 Server Error: Internal Server Error for url: /search'),367,2026-07-16T20:58:55Z,2026-07-16T20:59:32Z

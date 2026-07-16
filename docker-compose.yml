@@ -2,6 +2,21 @@ version: "3.8"
 
 services:
   # -------------------------
+  # Redis Task Bus (NEW V4/V5 Message Broker)
+  # -------------------------
+  redis-broker:
+    image: redis:latest
+    container_name: orion-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------
   # MongoDB Database
   # -------------------------
   mongodb:
@@ -19,7 +34,7 @@ services:
       retries: 5
 
   # -------------------------
-  # Qdrant Vector Database (NEW Enterprise Data Plane)
+  # Qdrant Vector Database
   # -------------------------
   qdrant:
     image: qdrant/qdrant:latest
@@ -38,29 +53,35 @@ services:
           memory: 4G
 
   # -------------------------
-  # gRPC Executor Microservice
+  # Background Executor Worker (Formerly gRPC Microservice)
   # -------------------------
   executor-microservice:
-    image: 2000023946/orion-executor:latest
+    build: 
+      context: ./api-gateway
+      dockerfile: dockerfile.executor
     container_name: orion-executor
     ports:
-      - "50051:50051"
+      - "8001:8000"
+    # Removed port 50051 exposure since it no longer accepts direct inbound web traffic
     depends_on:
       mongodb:
+        condition: service_healthy
+      redis-broker:
         condition: service_healthy
       qdrant:
         condition: service_started
     environment:
+      # Now connects to the Task Bus to pull jobs
+      BUS_TARGET_ADDRESS: redis://redis-broker:6379/0
       METADATA_DB_URL: mongodb://host.docker.internal:27017
       QDRANT_TARGET_ADDRESS: http://host.docker.internal:6333
-      # FIX: Must use 8080, because that is the port mapped to the host!
       EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
       WEB_API_KEY: ${WEB_API_KEY}
       LLM_API_KEY: ${LLM_API_KEY}
     restart: unless-stopped
 
   # -------------------------
-  # Backend (MCP API Gateway)
+  # Backend (FastAPI Gateway)
   # -------------------------
   api:
     build: 
@@ -70,14 +91,11 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - executor-microservice
+      redis-broker:
+        condition: service_healthy
     environment:
-      LLM_API_KEY: ${LLM_API_KEY}
-      METADATA_DB_URL: mongodb://host.docker.internal:27017
-      QDRANT_TARGET_ADDRESS: http://host.docker.internal:6333
-      EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
-      # FIX: gRPC requires no http:// prefix
-      EXECUTOR_TARGET_ADDRESS: host.docker.internal:50051
+      # Pushes tasks and subscribes to results via Redis
+      BUS_TARGET_ADDRESS: redis://redis-broker:6379/0
     restart: unless-stopped
 
   # -------------------------
@@ -104,7 +122,6 @@ services:
     depends_on:
       - api
     environment:
-      # (Frontend actually runs in your Mac browser, so localhost is correct here)
       VITE_API_URL: http://localhost:8000
     restart: unless-stopped
 

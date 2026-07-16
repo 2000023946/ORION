@@ -107,9 +107,12 @@ class RealGraphExecuter(GraphExecutorPort):
             tool_name=tool_name,
             tool_output_registry=tool_output_registry,
         )
+        print("tool got request", tool_request, " tool_name", tool_name)
         try:
             tool_response = await mcp_server.call_tool(tool_name, tool_request)
+            print("tool_response tool_name", tool_name)
         except Exception as e:
+            print("error occured with tool", tool_name)
             tool_response = ToolResponse(
                 tool_name=tool_name,
                 output={},

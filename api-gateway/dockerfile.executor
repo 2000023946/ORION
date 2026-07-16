@@ -23,5 +23,5 @@ ENV PYTHONPATH=/app
 EXPOSE 50051
 
 # Run the server using the exact module command that worked locally
-CMD ["python3", "-m", "src.infrastructure.real.graph_executor.grpc_graph_executor_service"]
+CMD ["python3", "-m", "src.application.main"]
 

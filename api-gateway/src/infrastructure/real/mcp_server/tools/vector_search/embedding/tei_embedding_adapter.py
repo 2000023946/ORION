@@ -19,7 +19,7 @@ class TeiEmbeddingAdapter(EmbeddingPort):
         # TEI exposes the embeddings route natively at /embed
         self.endpoint = f"{target_url.rstrip('/')}/embed"
 
-    def embed(self, text: str) -> Vector:
+    async def embed(self, text: str) -> Vector:
         response = requests.post(self.endpoint, json={"inputs": text})
         response.raise_for_status()
         data = response.json()
@@ -29,7 +29,7 @@ class TeiEmbeddingAdapter(EmbeddingPort):
             return data[0]
         return data
 
-    def embed_batch(self, texts: List[str]) -> List[Vector]:
+    async def embed_batch(self, texts: List[str]) -> List[Vector]:
         response = requests.post(self.endpoint, json={"inputs": texts})
         response.raise_for_status()
         

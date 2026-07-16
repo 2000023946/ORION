@@ -1,2 +1,2 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,RemoteDisconnected('Remote end closed connection without response'),1880,2026-07-16T03:05:59Z,2026-07-16T03:06:37Z
+POST,/search,"ConnectionResetError(54, 'Connection reset by peer')",3000,2026-07-16T21:03:56Z,2026-07-16T21:05:06Z

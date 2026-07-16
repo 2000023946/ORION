@@ -8,14 +8,14 @@ class EmbeddingPort(ABC):
     """
 
     @abstractmethod
-    def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> List[float]:
         """
         Convert text into embedding vector.
         """
         pass
 
     @abstractmethod
-    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """
         Convert multiple texts into embedding vectors.
         """

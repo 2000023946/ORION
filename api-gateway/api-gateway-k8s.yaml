@@ -46,6 +46,8 @@ spec:
             value: "http://orion-embedding:80"
           - name: EXECUTOR_TARGET_ADDRESS
             value: "orion-executor:50051"
+          - name: BUS_TARGET_ADDRESS
+            value: "redis://orion-redis:6379/0"
           
           # ==========================================
           # NEW: Enterprise Vector Store Connection

@@ -60,6 +60,8 @@ class Settings:
     metadata_collection_name: str = os.getenv("METADATA_COLLECTION_NAME", "products")
 
     metadata_batch_size: int = int(os.getenv("METADATA_BATCH_SIZE", "10"))
+    
+    bus_target_address: str = os.getenv("BUS_TARGET_ADDRESS", "redis://localhost:6379/0")
 
     # ----------------------------
     # Debug

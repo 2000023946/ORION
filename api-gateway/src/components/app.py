@@ -1,9 +1,10 @@
+from src.application.search_service import SearchService
 from src.components.graph_executor_infrastructure import GraphExecutorInfrastructure
 from src.components.mcp_client_infrastructure import MCPClientInfrastructure
 from src.components.mcp_server_infrastructure import MCPServerInfrastructure
 
-
 from src.application.search_use_case import SearchUseCase
+from src.components.task_bus_infrastructure import TaskBusInfrastructure
 from src.domain.query import Query
 
 class App:
@@ -12,7 +13,7 @@ class App:
         self.mcp_server_infras = MCPServerInfrastructure()
         self.mcp_client_infras = MCPClientInfrastructure()
         self.graph_executor_infras = GraphExecutorInfrastructure()
-        
+        self.task_bus_infras = TaskBusInfrastructure()
         if mock:
             self.mcp_client_infras.use_mock()
             self.mcp_server_infras.use_mock()
@@ -23,10 +24,11 @@ class App:
             mcp_server=self.mcp_server_infras.mcp_server,
             graph_executor=self.graph_executor_infras.graph_executor
         )
+        
+        self.worker = SearchService(
+            use_case=self.search_use_case, 
+            task_bus=self.task_bus_infras.task_bus
+        )
 
-    async def run(self, query_text: str):
-        query = Query(text=query_text)
-
-        result = await self.search_use_case.run(query)
-
-        return result
+    async def run(self):
+        await self.worker.execute()
