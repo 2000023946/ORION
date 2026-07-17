@@ -1,22 +1,23 @@
 
+
 ---
 
 # 🚀 Orion
 
-**Orion** is an MCP-based dynamic retrieval system that uses LLM-driven orchestration to execute intelligent search strategies across multiple tools.
+**Orion** is a cloud-scalable, MCP-based dynamic retrieval system that uses LLM-driven orchestration to execute intelligent search strategies across multiple tools.
 
-Instead of a fixed pipeline, Orion builds and executes **dynamic retrieval DAGs** using the Model Context Protocol (MCP), enabling adaptive querying across:
+Designed for high-throughput enterprise environments, Orion replaces fixed pipelines with **dynamic retrieval DAGs**. It leverages a load-buffered architecture (API Gateway + Message Queue) and a Redis edge cache to handle massive concurrent traffic, while utilizing asynchronous Model Context Protocol (MCP) execution to adaptively query across:
 
-* Vector (semantic) search
-* Structured database filtering
-* Metadata refinement
-* Web search integration
+* **Vector (semantic) search**
+* **Structured database filtering**
+* **Metadata refinement**
+* **Web search integration**
 
-All tools are orchestrated through a central MCP execution layer that plans, executes, and aggregates results into a final response.
+Built on pragmatic distributed systems principles, all I/O-bound tools are co-located for ultra-fast native `async` execution, while heavy ML compute is isolated into standalone services. The central MCP orchestration layer plans, executes, and aggregates these results into a lightning-fast final response without choking the event loop.
 
 ---
 
-# 📌 Architecture
+# 📌 System Architecture
 
 ```
 User Query → MCP Planner → DAG Execution → Tool Layer → Context → Final LLM Answer
@@ -34,6 +35,20 @@ Full architecture details:
 ```
 ./docs
 ```
+
+---
+
+## ☁️ Regional Cloud Architecture
+
+Orion uses a decoupled, buffered architecture designed to survive massive enterprise traffic spikes without dropping requests:
+
+* **Edge Cache & API Gateway:** Instantly serves repeated queries to shield downstream compute resources from redundant work.
+* **Message Queue Buffer:** Acts as a shock absorber. By decoupling request ingestion from execution, it prevents expensive 3-second search queries from exhausting the server's connection pool.
+* **Co-Located Search Engine:** Groups I/O-bound MCP tools on a single pod for zero-latency `async` communication, avoiding the nanoservice trap of excessive network hops.
+* **Isolated Compute & State:** Keeps heavy ML embedding models and enterprise databases strictly external, preserving the core cluster's ability to horizontally scale.
+
+
+> 📖 **Note:** For deep-dive technical configurations, infrastructure manifests, and detailed deployment steps, please refer to the comprehensive documentation located in the `./docs/cloud/` directory of the project repository.
 
 ---
 
@@ -91,6 +106,77 @@ docker compose up --build
 
 * Frontend UI → [http://localhost:3000](http://localhost:3000)
 * Backend API → [http://localhost:8000](http://localhost:8000)
+
+---
+
+## ☸️ Local Kubernetes Deployment (Minikube)
+
+To spin up the cloud-scalable architecture locally on a Mac, ensure Minikube is installed and active, then apply all cluster manifests:
+
+```bash
+# Start the local cluster environment
+minikube start
+
+# Deploy all services, configurations, and infrastructure nodes
+kubectl apply -f .
+
+```
+
+### Exposing the Endpoints
+
+Because the architecture relies on a decoupled ingress and real-time telemetry extraction, establish network tunnels by running these port-forwards in separate terminal sessions:
+
+1. **API Gateway Ingress** (Exposes the edge entry point to submit requests):
+```bash
+kubectl port-forward deployment/api-gateway 8000:8000
+
+```
+
+
+2. **Prometheus Telemetry Endpoint** (Strictly required by the load-testing script to parse system metrics and populate the performance dashboard):
+```bash
+kubectl port-forward deployment/prometheus 9090:9090
+
+```
+
+
+
+With both tunnels active, the automated Locust test harness seamlessly interacts with the API gateway while simultaneously scraping live CPU, memory, and duration metrics directly from the Prometheus endpoint to generate the comprehensive dashboard.
+
+--- 
+
+## 🧪 Performance Benchmarking & Load Testing
+
+To validate architectural scaling boundaries empirically, Orion relies on a dynamic, highly automated load-testing suite managed entirely inside the `./locust` directory.
+
+Executing the benchmarking protocol requires running a single automated script:
+
+```bash
+python3 run_sequential_tests.py
+
+```
+
+This execution runner sequentially triggers tests across scaling brackets (100, 250, 500, 1000, and 2000 concurrent users), measuring end-to-end throughput alongside per-component CPU constraints, execution intervals, and active connection latencies via Prometheus scraping.
+
+All outputs are automatically structured and archived hierarchically within the metrics suite:
+
+```text
+.
+├── baseline_results
+│   ├── 100_users/          # Outbound CSVs, exceptions, and prometheus captures
+│   ├── 250_users/
+│   ├── 500_users/
+│   ├── 1000_users/
+│   ├── 2000_users/
+│   └── comprehensive_metrics_dashboard.html
+├── collect_prometheus.py   # Automated telemetry data extractor
+├── generate_comparison_report.py
+├── locustfile.py           # Dynamic query runner simulation
+└── run_sequential_tests.py # Primary automation harness
+
+```
+
+Upon completion, the orchestration runner dynamically compiles raw metrics logs and pulls data from Prometheus, auto-generating a standalone visual file: `comprehensive_metrics_dashboard.html`. This report provides localized visualization of failure distributions, resource-to-request trends, and cache hit/miss advantages across massive traffic gradients.
 
 ---
 
@@ -222,15 +308,6 @@ python3 test.graph_executor.py
 | tests/integrated          | Full MCP component-level debugging    |
 
 ---
-
-
-
-
-
-
-
-
-
 
 
 
