@@ -1,277 +1,134 @@
-I would structure the entire project like a research experiment. The key principle is:
-
-> **Only split a component into a microservice if the measurements justify it.**
+Here is the combined document. It merges your target distributed architecture with the rigorous experimental methodology required to justify it, creating a single, cohesive engineering proposal.
 
 ---
 
-# Orion Microservice Evaluation Plan
+## Orion: Enterprise Distributed Architecture & Evaluation Methodology
 
-## Phase 0 — Build a Controlled Monolith
+The next evolution of Orion is a cloud-native, distributed Model Context Protocol (MCP) architecture. It is designed for high throughput, horizontal scalability, and enterprise-scale deployment. The system prioritizes concurrent load handling, clean domain isolation, and efficient resource scaling over purely optimizing single-request latency.
 
-### Goal
-
-Create a stable system that produces repeatable benchmark results.
-
-### Tasks
-
-* Build Orion as a single monolithic application.
-* Replace external services with mock implementations:
-
-  * Mock LLM API
-  * Mock Web Search API
-* Mock APIs should:
-
-  * Sleep for configurable delays
-  * Return realistic JSON responses
-  * Never call the internet
-
-At this point the architecture is:
-
-```text
-Monolith
-├── API
-├── Graph Executor
-├── Planner
-├── Vector Search
-├── Redis
-├── Mock LLM
-└── Mock Web Search
-```
+However, this architectural target must be proven, not assumed. The entire migration operates as a rigorous research experiment guided by one core principle: **Only split a component into a microservice if the measurements justify it.**
 
 ---
 
-# Phase 1 — Add Instrumentation
+### I. System Vision & Target Architecture
 
-### Goal
+If the benchmark data fully validates the decomposition, the final system will be organized into the following layers:
 
-Measure where every request spends its time.
+**Edge & Orchestration Layer**
 
-Instrument every major component.
+* **Load Balancer:** Distributes incoming traffic across multiple API instances to ensure high availability and prevent ingestion bottlenecks.
+* **API Gateway:** Acts as a lightweight orchestration layer forwarding requests into the MCP pipeline.
+* **Redis Edge Cache:** Intercepts repeated query responses, LLM-generated plans, and tool execution results to drastically reduce redundant computational overhead.
 
-Record for every request:
+**Core Compute Services**
 
-* Start time
-* End time
-* Duration
+* **LLM Planner Service:** Isolated as an independent service due to its high inference cost (averaging ~3s per request) and its role as a primary scaling bottleneck.
+* **Graph Execution Engine:** Processes MCP workflows rapidly via gRPC and task buses. It is physically separated from request handling to prevent tight coupling and preserve memory limits under extreme load.
 
-Optionally record:
+**Specialized MCP Tool Microservices**
+Tools are deployed as independent microservices to allow workload-specific scaling:
 
-* Memory usage (before/after)
+* **Metadata Filtering Service:** Handles lightweight, rapid queries.
+* **Vector Search Service:** Handles moderately expensive I/O operations.
+* **Web Search Service:** Manages highly variable, latency-heavy external calls.
 
-Example output:
+**Embedding & Storage Migration**
 
-| Component       | Avg Time | Memory |
-| --------------- | -------: | -----: |
-| API             |     4 ms |  30 MB |
-| Graph Executor  |    28 ms | 120 MB |
-| Planner         |    18 ms |  45 MB |
-| Vector Search   |   110 ms | 3.8 GB |
-| Redis           |     2 ms | 150 MB |
-| Mock LLM        |   300 ms |  20 MB |
-| Mock Web Search |   520 ms |  15 MB |
+* **Embedding Generation:** Isolated to scale appropriately for compute-heavy and memory-intensive operations (e.g., sentence-transformer models).
+* **Vector Database:** Transitions from local, containerized FAISS storage to Pinecone for a fully managed, horizontally scalable, multi-region production environment.
 
 ---
 
-# Phase 2 — Establish the Baseline
+### II. Microservice Evaluation Methodology
 
-Run Locust against the monolith.
+To build the final architecture, we will measure where every request spends its time and evaluate candidates individually.
 
-Test:
+#### Phase 0: Build a Controlled Monolith
 
-* 10 users
-* 50 users
-* 100 users
-* 250 users
-* 500 users
-* 1000 users
+Establish a stable baseline system that produces repeatable benchmark results.
 
-Collect:
+* Build Orion as a single monolithic application containing the API, Graph Executor, Planner, and Vector Search.
+* Replace external services with mock implementations (Mock LLM, Mock Web Search).
+* Ensure mock APIs sleep for configurable delays.
+* Ensure mock APIs return realistic JSON responses.
+* Ensure mock APIs never call the internet.
 
-* Requests/sec
-* Average latency
-* p95 latency
-* Failure rate
-* Component timings
-* Memory measurements
+#### Phase 1: Add Instrumentation
 
-**Save these results permanently.**
+Instrument every major component to track performance metrics.
 
-This is the **baseline**.
+* Record the start time, end time, and duration for every request.
+* Optionally record memory usage before and after execution.
 
-Never overwrite it.
+**Example Component Timing Output:**
 
----
+| Component | Avg Time | Memory |
+| --- | --- | --- |
+| API | 4 ms | 30 MB |
+| Graph Executor | 28 ms | 120 MB |
+| Planner | 18 ms | 45 MB |
+| Vector Search | 110 ms | 3.8 GB |
+| Redis | 2 ms | 150 MB |
+| Mock LLM | 300 ms | 20 MB |
+| Mock Web Search | 520 ms | 15 MB |
 
-# Phase 3 — Evaluate Each Candidate Independently
+#### Phase 2: Establish the Baseline
 
-Always start from the **original monolith**.
+Run Locust against the Phase 0 monolith to collect the permanent baseline metrics.
 
-Do **not** build on previous experiments.
+* Test at intervals of 10, 50, 100, 250, 500, and 1000 users.
+* Collect throughput (requests/sec), average latency, p95 latency, failure rate, and component timings.
+* Save these results permanently; never overwrite them.
 
----
+#### Phase 3: Evaluate Candidates Independently
 
-## Experiment A
+Always start from the original Phase 0 monolith. Do not build on previous experiments.
 
-Split only:
+* **Experiment A:** Split only the Graph Executor. Run benchmarks, compare with baseline, and record the decision. Return to monolith.
+* **Experiment B:** Split only the Planner. Run benchmarks, compare, and record. Return to monolith.
+* **Experiment C:** Split only Vector Search. Run benchmarks, compare, and record. Return to monolith.
+* **Experiment D:** Split only the LLM. Run benchmarks, compare, and record. Return to monolith.
+* **Experiment E:** Split only Web Search. Run benchmarks, compare, and record. Return to monolith.
 
-```text
-Graph Executor
-```
+#### Phase 4: Build the Final Architecture
 
-Run the exact same Locust tests.
+Construct the final system utilizing only the specific services that demonstrated a measurable performance benefit during the independent experiments in Phase 3.
 
-Compare with the baseline.
+#### Phase 5: Final Validation
 
-Decision:
+Benchmark the final architecture using the exact same Locust workloads to answer the ultimate question: *Does the final architecture outperform the original monolith?*
 
-* Better → Keep as a candidate.
-* Worse → Reject.
+| Metric | Monolith Baseline | Final Architecture |
+| --- | --- | --- |
+| Throughput |  |  |
+| Avg Latency |  |  |
+| p95 Latency |  |  |
+| Failure Rate |  |  |
 
-Return to the original monolith.
+#### Phase 6: Analyze the Results
 
----
+Provide an evidence-based conclusion for every component.
 
-## Experiment B
+**Example Analysis:**
 
-Split only:
-
-```text
-Planner
-```
-
-Run benchmarks.
-
-Compare with the baseline.
-
-Return to the original monolith.
-
----
-
-## Experiment C
-
-Split only:
-
-```text
-Vector Search
-```
-
-Run benchmarks.
-
-Compare with the baseline.
-
-Return to the original monolith.
+| Component | Evidence | Decision |
+| --- | --- | --- |
+| Graph Executor | Throughput increased by 32% | Microservice |
+| Planner | No measurable improvement | Keep in monolith |
+| Vector Search | Lower latency and isolated memory usage | Microservice |
 
 ---
 
-## Experiment D
+### III. Final Deliverables
 
-Split only:
+The resulting engineering report will serve as a robust defense of the system's design and will include:
 
-```text
-LLM
-```
-
-Run benchmarks.
-
-Compare with the baseline.
-
-Return to the original monolith.
+* **Architecture Diagrams:** Visualizations of the original monolith, simplified experimental configurations, and the final microservice topology.
+* **Instrumentation Results:** Raw data covering per-component timing and optional memory usage.
+* **Benchmark Results:** Locust outputs detailing throughput, average/p95 latency, and failure rates.
+* **Comparison Tables:** Direct comparisons between the baseline and individual experiments, as well as the baseline versus the final build.
+* **Evidence-Backed Decisions:** Explicit justifications detailing exactly why each service was kept in the monolith or extracted, relying strictly on collected measurements rather than generic distributed system principles.
 
 ---
 
-## Experiment E
-
-Split only:
-
-```text
-Web Search
-```
-
-Run benchmarks.
-
-Compare with the baseline.
-
-Return to the original monolith.
-
----
-
-# Phase 4 — Build the Final Architecture
-
-Suppose the experiments show:
-
-| Service        | Improvement | Decision |
-| -------------- | ----------- | -------- |
-| Graph Executor | ✅           | Split    |
-| Planner        | ❌           | Keep     |
-| Vector Search  | ✅           | Split    |
-| LLM            | ✅           | Split    |
-| Web Search     | ❌           | Keep     |
-
-Now construct the final system using only the services that demonstrated a benefit.
-
----
-
-# Phase 5 — Final Validation
-
-Benchmark the final architecture using the **same Locust workloads**.
-
-Compare:
-
-| Metric            | Monolith | Final Architecture |
-| ----------------- | -------: | -----------------: |
-| Throughput        |          |                    |
-| Avg Latency       |          |                    |
-| p95 Latency       |          |                    |
-| Failure Rate      |          |                    |
-| Component Timings |          |                    |
-
-This answers the most important question:
-
-> **Does the final architecture outperform the original monolith?**
-
----
-
-# Phase 6 — Analyze the Results
-
-For every component, provide an evidence-based conclusion.
-
-Example:
-
-| Component      | Evidence                                     | Decision         |
-| -------------- | -------------------------------------------- | ---------------- |
-| Graph Executor | Throughput increased by 32%                  | Microservice     |
-| Planner        | No measurable improvement                    | Keep in monolith |
-| Vector Search  | Lower latency and isolated memory usage      | Microservice     |
-| LLM            | External dependency with high latency        | Microservice     |
-| Web Search     | No measurable benefit in this implementation | Keep in monolith |
-
----
-
-# Final Deliverables
-
-Your report should include:
-
-* **Architecture diagrams**
-
-  * Original monolith
-  * Each experimental configuration (optional, simplified)
-  * Final microservice architecture
-* **Instrumentation results**
-
-  * Per-component timing
-  * Optional memory usage
-* **Locust benchmark results**
-
-  * Throughput
-  * Average latency
-  * p95 latency
-  * Failure rate
-* **Comparison tables**
-
-  * Baseline vs. each experiment
-  * Baseline vs. final architecture
-* **Evidence-backed architectural decisions**
-
-  * Explain *why* each service was kept in the monolith or extracted into a microservice using your measurements, not general microservice principles.
-
-This gives you a rigorous methodology that is easy to execute, repeatable, and strong enough to defend in a cloud or distributed systems report.
+To ensure the Phase 0 monolith accurately simulates the memory footprint of your background task serialization, do you want to define specific payload sizes for those Mock API JSON responses?
