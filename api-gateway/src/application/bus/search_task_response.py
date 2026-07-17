@@ -14,3 +14,12 @@ class SearchTaskResponse:
     answer: Optional[SearchAnswer] = None
     error: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
+    
+    def to_dict(self):
+        return {
+            "request_id": self.request_id.value,
+            "success": self.success,
+            "answer": '' if not self.answer else self.answer.answer,
+            "error": self.error,
+            "metadata":self.metadata
+        }

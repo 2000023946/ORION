@@ -37,7 +37,6 @@ class RedisSearchTaskBus(SearchTaskBus):
         }
         
         await self._redis.lpush(self.queue_name, json.dumps(payload))
-        print(f"[INFO] Pushed task {search_task.request_id.value} to {self.queue_name}")
         
         return search_task.request_id
 
@@ -70,10 +69,8 @@ class RedisSearchTaskBus(SearchTaskBus):
             "metadata": result.metadata
         }
         
-        print("pushing withteh paylod", payload)
         
         await self._redis.publish(specific_channel, json.dumps(payload))
-        print(f"[INFO] Published result to {specific_channel}")
 
     async def subscribe(self, request_id: RequestID, timeout_seconds: float = 60.0) -> SearchTaskResponse:
         """Gateway listens for the result. Raises a TimeoutError if breached."""
@@ -82,7 +79,6 @@ class RedisSearchTaskBus(SearchTaskBus):
         
         try:
             await pubsub.subscribe(specific_channel)
-            print(f"[INFO] Subscribed to {specific_channel}, waiting up to {timeout_seconds}s")
             
             async with asyncio.timeout(timeout_seconds):
                 async for message in pubsub.listen():
@@ -102,7 +98,6 @@ class RedisSearchTaskBus(SearchTaskBus):
                 raise RuntimeError("Redis PubSub loop exited unexpectedly without a message.")
                         
         except TimeoutError:
-            print(f"[ERROR] Timeout waiting for result on {specific_channel}")
             raise TimeoutError(f"Task {request_id.value} did not complete within {timeout_seconds} seconds.")
             
         finally:

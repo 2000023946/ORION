@@ -48,7 +48,8 @@ spec:
             value: "orion-executor:50051"
           - name: BUS_TARGET_ADDRESS
             value: "redis://orion-redis:6379/0"
-          
+          - name: CACHE_TARGET_ADDRESS
+            value: "redis://orion-redis:6379/1"
           # ==========================================
           # NEW: Enterprise Vector Store Connection
           # ==========================================

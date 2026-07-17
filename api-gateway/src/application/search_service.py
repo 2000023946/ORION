@@ -19,18 +19,15 @@ class SearchService:
         and process them through the Search Use Case.
         """
         self._is_running = True
-        print(f"Worker started. Listening to queue: {self.task_bus.queue_name}")
         
         while self._is_running:
             try:
                 
                 # 1. Poll task from the task bus (yields control to event loop while empty)
                 task = await self.task_bus.pop_task()
-                print("got a task recieved", task)
                 if not task:
                     continue
                     
-                print(f"Processing RequestID: {task.request_id.value}")
                 
                 # 2. Call the Use Case
                 response = await self.use_case.run(task.query)
@@ -46,18 +43,15 @@ class SearchService:
                 
                 # 4. Publish the result back to the Gateway
                 await self.task_bus.publish(task_response)
-                print(f"Published result for RequestID: {task.request_id.value}")
                 
             except asyncio.CancelledError:
                 # Allows the worker to shut down gracefully when Kubernetes terminates the pod
-                print("Worker shutting down gracefully.")
                 self._is_running = False
                 break
             except Exception as e:
                 # Catch unexpected errors so the worker doesn't crash permanently
-                print(f"Critical error in worker loop: {str(e)}")
                 # (Optional but recommended: publish a failure response back to the Gateway here)
-
+                pass
     def stop(self):
         """Signals the worker to stop processing new tasks."""
         self._is_running = False

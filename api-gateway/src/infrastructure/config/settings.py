@@ -62,6 +62,8 @@ class Settings:
     metadata_batch_size: int = int(os.getenv("METADATA_BATCH_SIZE", "10"))
     
     bus_target_address: str = os.getenv("BUS_TARGET_ADDRESS", "redis://localhost:6379/0")
+    
+    cache_target_address: str = os.getenv("CACHE_TARGET_ADDRESS", "redis://localhost:6379/1")
 
     # ----------------------------
     # Debug

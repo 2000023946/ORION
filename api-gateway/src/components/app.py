@@ -1,4 +1,5 @@
 from src.application.search_service import SearchService
+from src.components.cache_infrastructure import CacheInfrastructure
 from src.components.graph_executor_infrastructure import GraphExecutorInfrastructure
 from src.components.mcp_client_infrastructure import MCPClientInfrastructure
 from src.components.mcp_server_infrastructure import MCPServerInfrastructure
@@ -6,6 +7,7 @@ from src.components.mcp_server_infrastructure import MCPServerInfrastructure
 from src.application.search_use_case import SearchUseCase
 from src.components.task_bus_infrastructure import TaskBusInfrastructure
 from src.domain.query import Query
+from src.infrastructure.real.cache.redis_cache_adapter import RedisCacheAdapter
 
 class App:
     def __init__(self, mock: bool = False):

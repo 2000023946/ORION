@@ -18,8 +18,9 @@ class MetadataFilterInfrastructure:
         try:
             seeder.reset_and_seed(SEED_DATA)
         except pymongo.errors.BulkWriteError as e:
-            print("[MongoDB] Database already seeded. Skipping initialization.")
-
+            pass
+        
+        
         self.http_client = MongoHttpClient(
             uri=settings.metadata_db_url,
             db_name=settings.metadata_db_name

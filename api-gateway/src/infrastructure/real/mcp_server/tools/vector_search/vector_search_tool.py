@@ -28,21 +28,16 @@ class VectorSearchTool(ToolPort):
         # ----------------------------
         # 2. Embed query → vector
         # ----------------------------
-        print("trying to embed")
         query_vector = await self.embedder.embed(query_text.text)
-        print("embed result", query_vector)
         # ----------------------------
         # 3. Vector search (FAISS / Pinecone / API)
         # ----------------------------
-        print("searching on the vector store")
         search_response = await self.vector_store.search(query_vector, settings.vector_top_k)
 
-        print("search response", search_response)
         # ----------------------------
         # 4. Convert raw → domain objects
         # ----------------------------
         results = VectorSearchResult.from_raw_list(search_response)
-        print("results,", results)
         # ----------------------------
         # 5. Return ToolResponse (DAG layer)
         # ----------------------------

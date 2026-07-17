@@ -73,6 +73,7 @@ services:
     environment:
       # Now connects to the Task Bus to pull jobs
       BUS_TARGET_ADDRESS: redis://redis-broker:6379/0
+      
       METADATA_DB_URL: mongodb://host.docker.internal:27017
       QDRANT_TARGET_ADDRESS: http://host.docker.internal:6333
       EMBEDDING_TARGET_ADDRESS: http://host.docker.internal:8080
@@ -96,6 +97,7 @@ services:
     environment:
       # Pushes tasks and subscribes to results via Redis
       BUS_TARGET_ADDRESS: redis://redis-broker:6379/0
+      CACHE_TARGET_ADDRESS: redis://redis-broker:6379/1
     restart: unless-stopped
 
   # -------------------------

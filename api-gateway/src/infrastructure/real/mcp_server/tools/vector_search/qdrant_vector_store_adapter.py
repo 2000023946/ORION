@@ -81,7 +81,6 @@ class QdrantVectorStoreAdapter(VectorStorePort):
         query_vector: Any, 
         k: int = 5
     ) -> List[Dict[str, Any]]:
-        print(f"[INFO] Searching from Qdrant collection: {self.collection_name}")
         
         clean_query = query_vector.tolist() if hasattr(query_vector, "tolist") else list(query_vector)
 
@@ -94,7 +93,6 @@ class QdrantVectorStoreAdapter(VectorStorePort):
             )
             
             search_results = response.points
-            print(f"[INFO] Search successful. Found {len(search_results)} results.")
 
             return [
                 {
@@ -105,7 +103,6 @@ class QdrantVectorStoreAdapter(VectorStorePort):
             ]
 
         except Exception as e:
-            print(f"\n[CRITICAL ERROR] Qdrant search failed: {str(e)}")
             traceback.print_exc() 
             return []
     

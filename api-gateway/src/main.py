@@ -6,7 +6,9 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
+from src.components.cache_infrastructure import CacheInfrastructure
 from src.components.task_bus_infrastructure import TaskBusInfrastructure
+# Import your new Cache Infrastructure (Adjust the path to match where you saved it)
 from src.metrics.decorator import measure
 
 # Import your domain and bus models
@@ -39,8 +41,9 @@ app.add_middleware(
 metrics_app = make_asgi_app()
 app.mount("/metrics", metrics_app)
 
-# initialize system once (composition root)
+# Initialize system infrastructure once (composition root)
 task_bus_infras = TaskBusInfrastructure()
+cache_infras = CacheInfrastructure() # Initialize the cache here!
 
 # -------------------------
 # Request / Response models
@@ -61,35 +64,72 @@ class SearchResponseModel(BaseModel):
 @measure("search_request")
 @app.post("/search", response_model=SearchResponseModel)
 async def search(req: SearchRequest):
-    print("got a request")
-    # 1. Generate a globally unique ID for this specific web request
+    
+    # 1. Create the Query object early so we can hash it for the cache
+    query = Query(text=req.query)
+
+    # ---------------------------------------------------------
+    # 2. EDGE CACHE INTERCEPTION
+    # ---------------------------------------------------------
+    try:
+        cached_response = await cache_infras.cache.get_answer(query)
+        if cached_response:
+            
+            # Tag it so the frontend knows it was lightning fast
+            metadata = cached_response.metadata or {}
+            metadata['gateway_cached'] = True
+
+            return SearchResponseModel(
+                success=cached_response.success,
+                # Make sure the '.answer' property matches your SearchAnswer dataclass
+                answer={"text": cached_response.answer.answer} if cached_response.answer else None,
+                error=cached_response.error,
+                metadata=metadata
+            )
+    except Exception as e:
+        # If the cache fails (e.g., Redis blips), log it but DO NOT crash the API.
+        # Gracefully fall through to the normal queue flow.
+        pass
+    # ---------------------------------------------------------
+
+    # 3. Generate a globally unique ID for this specific web request
     request_id = RequestID(value=str(uuid.uuid4()))
     
-    # 2. Package the domain task
+    # 4. Package the domain task
     task = SearchTask(
         request_id=request_id,
-        query=Query(text=req.query)
+        query=query
     )
 
     try:
-        # 3. Push to the Worker Queue
-        print("pushing the task now", task)
+        # 5. Push to the Worker Queue
         await task_bus_infras.task_bus.push_task(task)
         
-        # 4. Suspend this HTTP request and wait for the Worker's broadcast
-        # The timeout ensures the client doesn't hang forever if the queue is overloaded
+        # 6. Suspend this HTTP request and wait for the Worker's broadcast
         bus_result = await task_bus_infras.task_bus.subscribe(request_id, timeout_seconds=500)
-        print("got the result", bus_result)
-        # 5. Map the internal Bus Response back to the external HTTP Response
+        
+        # ---------------------------------------------------------
+        # NEW: SAVE TO EDGE CACHE
+        # ---------------------------------------------------------
+        # Only cache the result if it was actually successful
+        if bus_result.success:
+            try:
+                await cache_infras.cache.set_answer(query, bus_result)
+            except Exception as e:
+                pass
+                # If the cache write fails, just log it. Don't crash the user's request!
+        # ---------------------------------------------------------
+        
+        # 7. Map the internal Bus Response back to the external HTTP Response
         return SearchResponseModel(
             success=bus_result.success,
             answer={"text": bus_result.answer.answer} if bus_result.answer else None,
             error=bus_result.error,
-            metadata=bus_result.metadata  # Can be populated if you pass metadata through the bus later
+            metadata=bus_result.metadata 
         )
 
     except TimeoutError as e:
-        # If the 60s timeout is breached, return a 504 Gateway Timeout
+        # If the timeout is breached, return a 504 Gateway Timeout
         raise HTTPException(status_code=504, detail=str(e))
         
     except Exception as e:

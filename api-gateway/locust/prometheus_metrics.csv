@@ -1,0 +1,5 @@
+timestamp,component,avg_latency_ms,memory_mb
+2026-07-16T19:40:09.772805,mcp_plan,701.02,0.02
+2026-07-16T19:40:09.872598,graph_executor,1273.16,0.0
+2026-07-16T19:40:09.930273,mcp_answer,1062.97,0.0
+2026-07-16T19:40:10.001227,db_filter_tool,inf,0.06

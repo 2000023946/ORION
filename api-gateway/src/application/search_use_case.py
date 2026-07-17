@@ -3,6 +3,7 @@ from src.domain.search_answer import SearchAnswer
 from src.application.search_response import SearchResponse
 from src.domain.retrieval_plan import RetrievalPlan
 from src.metrics.decorator import measure
+from src.ports.cache import CachePort
 from src.ports.graph_executer_port import GraphExecutorPort
 from src.domain.context import Context
 from src.domain.tool import Tool
@@ -16,7 +17,7 @@ class SearchUseCase:
         self,
         mcp_client: MCPClientPort,
         mcp_server: MCPServerPort,
-        graph_executor: GraphExecutorPort
+        graph_executor: GraphExecutorPort,
     ):
         self.mcp_client = mcp_client
         self.mcp_server = mcp_server

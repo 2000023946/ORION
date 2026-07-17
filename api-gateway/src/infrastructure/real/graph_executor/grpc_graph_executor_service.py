@@ -62,7 +62,6 @@ async def serve():
     # 3. Start the standalone background Prometheus HTTP server on port 8000
     # This runs on its own background thread to answer scrape requests from K8s
     metrics_port = 8000
-    print(f"Starting Prometheus metrics server on port {metrics_port}...")
     start_http_server(metrics_port, addr="0.0.0.0")
 
     # 4. Initialize real infrastructure containers
@@ -81,7 +80,6 @@ async def serve():
     
     listen_addr = '[::]:50051'
     server.add_insecure_port(listen_addr)
-    print(f"Executor Microservice starting on gRPC port {listen_addr}...")
     
     await server.start()
     await server.wait_for_termination()
