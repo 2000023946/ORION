@@ -1,2 +1,2 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",298,2026-07-27T19:49:58Z,2026-07-27T19:50:59Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",11039,2026-07-27T20:41:49Z,2026-07-27T20:43:48Z
