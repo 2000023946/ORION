@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: api-gateway
 spec:
-  replicas: 1
+  replicas: 4 # Updated to match your pre-scaled HPA
   selector:
     matchLabels:
       app: api-gateway
@@ -25,6 +25,15 @@ spec:
       labels:
         app: api-gateway
     spec:
+      # ==========================================
+      # NEW: OS Socket Backlog Expansion
+      # ==========================================
+      securityContext:
+        sysctls:
+        - name: net.core.somaxconn
+          value: "4096"
+        - name: net.ipv4.tcp_max_syn_backlog
+          value: "4096"
       containers:
       - name: api-gateway
         image: 2000023946/orion-api:latest # Updated to match your Docker Hub tag!
@@ -66,8 +75,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: api-gateway
-  minReplicas: 1
-  maxReplicas: 4 # Will clone up to 5 pods under heavy load
+  minReplicas: 4
+  maxReplicas: 4 
   metrics:
   - type: Resource
     resource:
