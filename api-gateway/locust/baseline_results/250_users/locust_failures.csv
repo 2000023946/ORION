@@ -1,3 +1,2 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,RemoteDisconnected('Remote end closed connection without response'),68,2026-07-16T23:44:16Z,2026-07-16T23:44:16Z
-POST,/search,HTTPError('500 Server Error: Internal Server Error for url: /search'),13,2026-07-16T23:44:37Z,2026-07-16T23:44:37Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",298,2026-07-27T19:49:58Z,2026-07-27T19:50:59Z

@@ -1,2 +1,0 @@
-Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,"ConnectionRefusedError(61, 'Connection refused')",52225,2026-07-16T23:49:47Z,2026-07-16T23:51:46Z

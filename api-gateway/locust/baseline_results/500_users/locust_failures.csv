@@ -1,3 +1,5 @@
 Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,RemoteDisconnected('Remote end closed connection without response'),463,2026-07-16T23:45:26Z,2026-07-16T23:46:40Z
-POST,/search,HTTPError('500 Server Error: Internal Server Error for url: /search'),541,2026-07-16T23:45:38Z,2026-07-16T23:47:09Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Error 111 connecting to orion-redis:6379. Connect call failed (\'10.110.59.72\', 6379).""}')",120,2026-07-27T19:53:49Z,2026-07-27T19:53:50Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Connection closed by server.""}')",86,2026-07-27T19:53:49Z,2026-07-27T19:53:50Z
+POST,/search,CatchResponseError('Failed: 0 - '),775,2026-07-27T19:53:22Z,2026-07-27T19:54:03Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",8715,2026-07-27T19:52:05Z,2026-07-27T19:53:21Z

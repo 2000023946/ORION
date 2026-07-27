@@ -1,4 +1,0 @@
-Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,"ConnectionResetError(54, 'Connection reset by peer')",669,2026-07-16T23:48:10Z,2026-07-16T23:48:17Z
-POST,/search,RemoteDisconnected('Remote end closed connection without response'),875,2026-07-16T23:47:41Z,2026-07-16T23:48:17Z
-POST,/search,"ConnectionRefusedError(61, 'Connection refused')",31704,2026-07-16T23:48:17Z,2026-07-16T23:49:33Z

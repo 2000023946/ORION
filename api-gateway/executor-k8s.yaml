@@ -64,28 +64,22 @@ spec:
       protocol: TCP
       port: 8000
       targetPort: 8000
-------
-apiVersion: keda.sh/v1alpha1
-kind: ScaledObject
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
 metadata:
-  name: orion-executor-scaler
-  labels:
-    app: orion-executor
+  name: orion-executor-hpa
 spec:
   scaleTargetRef:
-    # Must match the name of your apps/v1 Deployment
+    apiVersion: apps/v1
+    kind: Deployment
     name: orion-executor
-  minReplicaCount: 2
-  # Capped at 8 to prevent your local macOS Minikube environment from locking up under heavy load testing
-  maxReplicaCount: 8
-  pollingInterval: 15
-  cooldownPeriod: 60
-  triggers:
-  - type: prometheus
-    metadata:
-      # Maps directly to your Prometheus Service (Service: prometheus, Port: 9090)
-      # Uses the fully qualified domain name since KEDA runs in its own namespace
-      serverAddress: http://prometheus.default.svc.cluster.local:9090
-      metricName: orion_queue_depth
-      query: sum(orion_queue_depth)
-      threshold: "10"
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

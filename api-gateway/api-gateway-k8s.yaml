@@ -67,7 +67,7 @@ spec:
     kind: Deployment
     name: api-gateway
   minReplicas: 1
-  maxReplicas: 1 # Will clone up to 5 pods under heavy load
+  maxReplicas: 2 # Will clone up to 5 pods under heavy load
   metrics:
   - type: Resource
     resource:
