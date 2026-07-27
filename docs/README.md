@@ -1,282 +1,286 @@
+# Source Code Architecture
+
+Orion is a **modular, interface-driven Model Context Protocol (MCP) orchestration system** that follows a **Domain-Driven Design (DDD)-inspired layered architecture**. The system emphasizes separation of concerns, dependency inversion, and extensibility through registry-based component resolution.
+
+The architecture is designed to support:
+
+* Separation of business logic from infrastructure
+* Pluggable implementations through interfaces
+* Dynamic tool discovery using registries
+* Deterministic orchestration and testability
 
 ---
 
-# 📦 src — Codebase Overview
+# System Execution Flow
 
-Orion’s core is a **modular, interface-driven MCP orchestration system** built using a **DDD-inspired architecture**.
+At runtime, the application follows the execution pipeline shown below:
 
-It is designed around:
-
-* strict separation of concerns
-* pluggable components
-* registry-based tool discovery
-* testable orchestration layers
-
----
-
-## 🧠 High-Level Flow
-
-```
+```text
 main.py
    ↓
 components/app.py
    ↓
-MCP Client → Plan → Graph Executor → Tools → LLM Response
+MCP Client
+   ↓
+Retrieval Planner
+   ↓
+Graph Executor
+   ↓
+Tool Execution
+   ↓
+LLM Response Generation
 ```
+
+The composition root initializes the application, constructs all dependencies, and coordinates the interaction between the planner, execution engine, and tool infrastructure.
 
 ---
 
-# 🧩 Architecture Layers
+# Architectural Layers
 
-## 1. domain/ (Pure Core Logic)
+## 1. Domain Layer (`domain/`)
 
-Contains **framework-free business logic**:
+The **domain layer** contains the framework-independent business model and defines the core abstractions used throughout the system.
 
-* Query, Context
+Representative components include:
+
+* Query
+* Context
 * Tool definitions
-* RetrievalPlan (DAG structure)
+* RetrievalPlan (Directed Acyclic Graph)
 * SearchAnswer
-* Input/Output contracts
+* Request and response contracts
 
-👉 No infrastructure, no LLM, no external dependencies.
-
----
-
-## 2. application/ (Use Cases)
-
-Implements orchestration logic:
-
-* SearchUseCase → main entry for query execution
-* SearchResponse → structured output
-
-👉 This layer connects domain → MCP execution.
+This layer contains no infrastructure code, networking logic, or language model integrations, allowing it to remain independent of implementation details.
 
 ---
 
-## 3. components/ (System Wiring Layer)
+## 2. Application Layer (`application/`)
 
-This is the **composition root**.
+The **application layer** implements the primary use cases that coordinate domain objects and system behavior.
 
-It is responsible for:
+Primary responsibilities include:
 
-* building MCP client/server
-* injecting infrastructure implementations
-* connecting graph executor
-* exposing FastAPI app
+* Executing search workflows
+* Coordinating retrieval operations
+* Producing structured responses
 
-👉 Think of this as “the bootstrap layer”.
+Key components include:
 
----
+* `SearchUseCase`
+* `SearchResponse`
 
-## 4. infrastructure/ (Concrete Implementations)
-
-Contains all real implementations:
-
-### real/
-
-* MCP client (LLM-driven planner)
-* MCP server (tool execution runtime)
-* Graph executor (DAG execution engine)
-* HTTP client (external APIs)
-* Tool implementations (vector, web, DB, metadata)
-
-### dummy/
-
-* mocked versions for testing without LLM / external APIs
+This layer orchestrates interactions between the domain model and the MCP execution infrastructure while remaining independent of infrastructure-specific implementations.
 
 ---
 
-# 🧠 Core Concept: Registry System
+## 3. Composition Layer (`components/`)
 
-Orion heavily uses **registry-based architecture** to avoid hardcoded dependencies.
+The **components layer** serves as the application's composition root, where concrete implementations are instantiated and dependencies are assembled.
+
+Its responsibilities include:
+
+* Constructing the MCP client
+* Constructing the MCP server
+* Initializing the graph executor
+* Configuring dependency injection
+* Exposing the FastAPI application
+
+This layer is responsible solely for application configuration and startup, avoiding the implementation of business logic.
 
 ---
 
-## 🔧 What is a Registry?
+## 4. Infrastructure Layer (`infrastructure/`)
 
-A registry is a **central mapping system** that connects:
+The **infrastructure layer** provides the concrete implementations required by the application.
 
+### Production Implementations (`real/`)
+
+This package contains production-ready implementations, including:
+
+* LLM-driven MCP planner
+* MCP server runtime
+* Directed Acyclic Graph (DAG) executor
+* HTTP client integrations
+* Vector search tools
+* Web search tools
+* Database retrieval tools
+* Metadata retrieval tools
+
+### Testing Implementations (`dummy/`)
+
+The testing package provides mock implementations that replace external dependencies during testing.
+
+These implementations enable:
+
+* Offline execution
+* Deterministic testing
+* Isolation from external APIs
+* LLM-independent unit tests
+
+---
+
+# Registry-Based Architecture
+
+Orion employs a **registry-based architecture** to decouple orchestration logic from concrete tool implementations.
+
+Rather than embedding tool-specific logic throughout the execution pipeline, registries provide dynamic mappings between tool identifiers and their associated implementations.
+
+Conceptually, the registry performs the mapping:
+
+```text
+Tool Identifier
+        ↓
+Concrete Tool Implementation
 ```
-Tool Name → Tool Implementation
-```
 
-Instead of hardcoding tool calls, everything is resolved dynamically.
+This approach enables runtime resolution of tools without requiring modifications to the orchestration pipeline.
 
 ---
 
-## 🧱 Main Registries in the System
+# Registry Components
 
-### 1. Tool Registry
+## Tool Registry
 
-Located in:
+Located within:
 
-```
+```text
 infrastructure/real/mcp_server/tools/core/
 ```
 
-Key files:
+Primary registry components include:
 
 * `tool_information_registry.py`
 * `tool_request_factory_registry.py`
 * `tool_output_registry.py`
 
-### What it does:
-
-It maps:
-
-```
-ToolName → Tool metadata + execution strategy
-```
-
-This allows MCP to:
-
-* discover available tools dynamically
-* construct tool requests at runtime
-* route execution without hardcoding logic
+Collectively, these registries maintain the metadata, construction logic, and output processing required for each supported tool.
 
 ---
 
-## 2. Tool Information Registry
+## Tool Information Registry
 
-Defines:
+The Tool Information Registry stores metadata describing each available tool, including:
 
-* tool name
-* inputs/outputs
-* description
-* schema
+* Tool identifier
+* Input schema
+* Output schema
+* Functional description
+* Capability metadata
 
-👉 Used by the MCP planner to decide WHICH tool to use.
-
----
-
-## 3. Tool Request Factory Registry
-
-Maps:
-
-```
-Tool → Request Builder
-```
-
-Each tool has a factory that:
-
-* builds validated request objects
-* ensures correct input formatting
-* isolates tool-specific logic
-
-👉 This is what enables clean DAG node execution.
+This information is consumed by the MCP planner during retrieval planning to determine which tools are appropriate for satisfying a query.
 
 ---
 
-## 4. Tool Output Registry
+## Tool Request Factory Registry
 
-Handles:
+The Tool Request Factory Registry associates each tool with a corresponding request builder responsible for constructing validated request objects.
 
-* normalizing tool outputs
-* converting raw results → domain objects
-* ensuring consistent response formats
+Its responsibilities include:
+
+* Building tool-specific request models
+* Validating input parameters
+* Isolating tool-specific request construction
+* Providing a consistent execution interface
+
+This abstraction allows DAG execution nodes to remain independent of tool implementation details.
 
 ---
 
-# ⚙️ MCP Execution Model (Important)
+## Tool Output Registry
 
-The system works as a **dynamic DAG execution engine**:
+The Tool Output Registry standardizes responses returned by heterogeneous tools.
 
-```
+Its responsibilities include:
+
+* Normalizing raw tool outputs
+* Converting results into domain objects
+* Producing consistent output formats across all tools
+
+This standardization simplifies downstream processing and aggregation.
+
+---
+
+# MCP Execution Model
+
+Orion executes retrieval workflows as a **Directed Acyclic Graph (DAG)** generated dynamically by the MCP planner.
+
+The execution process consists of the following stages:
+
+```text
 LLM Planner
-   ↓
+      ↓
 RetrievalPlan (DAG)
-   ↓
+      ↓
 Graph Executor
-   ↓
-Registry resolves tools
-   ↓
-Tool execution
-   ↓
-Aggregated context
-   ↓
-Final LLM response
+      ↓
+Registry-Based Tool Resolution
+      ↓
+Tool Execution
+      ↓
+Context Aggregation
+      ↓
+Final LLM Response
 ```
 
----
-
-# 🧠 Why Registries Matter
-
-This design enables:
-
-### ✅ No hardcoded tool logic
-
-Everything is resolved dynamically
-
-### ✅ Easy testing
-
-You can swap:
-
-* real tools → dummy tools
-* LLM → mocked planner
-
-### ✅ Extensibility
-
-Adding a tool =
-
-1. implement tool
-2. register it
-3. done (no pipeline changes)
-
-### ✅ Clean MCP separation
-
-Planner doesn’t know execution details
+Each execution node represents an individual retrieval operation. The graph executor resolves the required implementation through the registry system before executing the corresponding tool.
 
 ---
 
-# 🔌 Component Construction Pattern
+# Architectural Benefits of Registry-Based Design
 
-Everything is built in layers:
+The registry abstraction provides several architectural advantages.
 
-### Step 1 — Define domain models
+### Dynamic Tool Resolution
 
-Query, Tool, Plan, Context
+Tool execution is determined at runtime through registry lookups rather than hardcoded conditionals, reducing coupling between orchestration and implementation.
 
-### Step 2 — Register tools
+### Extensibility
 
-ToolRegistry maps everything
+New tools can be integrated by:
 
-### Step 3 — Inject infrastructure
+1. Implementing the tool interface.
+2. Registering the implementation within the appropriate registries.
 
-components/app.py wires:
+No modifications to the orchestration pipeline are required.
 
-* MCP client
-* MCP server
-* graph executor
+### Testability
 
-### Step 4 — Execute DAG
+Registry mappings allow production implementations to be replaced with mock implementations during testing, enabling deterministic execution without external services.
 
-Graph executor resolves everything via registry
+### Separation of Responsibilities
 
----
-
-# 🧪 Testing Alignment
-
-Because of registry + interface design:
-
-* tools can be mocked easily
-* MCP client can be isolated
-* DAG execution is deterministic
-* unit tests don’t require real LLM
+The MCP planner determines **which** tools should be used, while the graph executor determines **how** they are executed. This separation preserves clear architectural boundaries between planning and execution.
 
 ---
 
-# 🧠 Design Summary
+# Component Construction Workflow
 
-Orion is:
+Application initialization proceeds through the following stages:
 
-* **DDD-inspired**
-* **registry-driven**
-* **interface-based MCP system**
-* **fully modular DAG executor**
-
-Registries are the core abstraction that enable:
-
-> dynamic tool orchestration without coupling or hardcoded logic
+1. Define the core domain models and interfaces.
+2. Register available tools and their associated metadata.
+3. Construct infrastructure implementations and inject dependencies through the composition layer.
+4. Execute retrieval plans using the graph executor, which resolves all tool implementations dynamically through the registry system.
 
 ---
 
+# Testing Architecture
+
+The interface-driven design and registry abstraction support comprehensive testing strategies.
+
+By replacing production components with mock implementations, the system enables:
+
+* Isolated unit testing
+* Deterministic DAG execution
+* Validation of orchestration logic independent of language models
+* Testing without external network dependencies
+
+This separation significantly improves reliability and maintainability throughout the development lifecycle.
+
+---
+
+# Design Summary
+
+Orion implements a **DDD-inspired, layered architecture** centered around **interface-based abstractions** and **registry-driven dependency resolution**. The system executes retrieval workflows as dynamically generated Directed Acyclic Graphs (DAGs), allowing planning, execution, and infrastructure concerns to remain independently extensible.
+
+The registry system serves as the primary architectural abstraction, enabling dynamic tool orchestration while minimizing coupling between components. This design supports extensibility, modularity, reproducibility, and comprehensive testing without requiring modifications to the core orchestration pipeline.

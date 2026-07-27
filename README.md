@@ -2,7 +2,7 @@
 
 ---
 
-# 🚀 Orion
+# Orion
 
 **Orion** is a cloud-scalable, MCP-based dynamic retrieval system that uses LLM-driven orchestration to execute intelligent search strategies across multiple tools.
 
@@ -17,7 +17,7 @@ Built on pragmatic distributed systems principles, all I/O-bound tools are co-lo
 
 ---
 
-# 📌 System Architecture
+# System Architecture
 
 ```
 User Query → MCP Planner → DAG Execution → Tool Layer → Context → Final LLM Answer
@@ -26,7 +26,7 @@ User Query → MCP Planner → DAG Execution → Tool Layer → Context → Fina
 Here’s a tighter version that keeps the meaning but makes it very minimal:
 
 ---
-## 🧠 System Design
+## System Design
 
 Orion follows a **modular, interface-driven (DDD-style) architecture** with clear separation between domain, application, and infrastructure layers. This enables high testability, maintainability, and pluggable MCP tool execution.
 
@@ -38,7 +38,7 @@ Full architecture details:
 
 ---
 
-## ☁️ Regional Cloud Architecture
+## Regional Cloud Architecture
 
 Orion uses a decoupled, buffered architecture designed to survive massive enterprise traffic spikes without dropping requests:
 
@@ -48,11 +48,11 @@ Orion uses a decoupled, buffered architecture designed to survive massive enterp
 * **Isolated Compute & State:** Keeps heavy ML embedding models and enterprise databases strictly external, preserving the core cluster's ability to horizontally scale.
 
 
-> 📖 **Note:** For deep-dive technical configurations, infrastructure manifests, and detailed deployment steps, please refer to the comprehensive documentation located in the `./docs/cloud/` directory of the project repository.
+> **Note:** For deep-dive technical configurations, infrastructure manifests, and detailed deployment steps, please refer to the comprehensive documentation located in the `./docs/cloud/` directory of the project repository.
 
 ---
 
-## 🎥 GIF Demo
+## GIF Demo
 
 A short demo showing a full end-to-end query flow through the MCP system:
 
@@ -68,7 +68,7 @@ This demonstrates how Orion dynamically orchestrates tools and executes structur
 ---
 
 
-# 🚀 Run the Application (Demo Mode)
+# Run the Application (Demo Mode)
 
 This is the **recommended way to start Orion**.
 
@@ -80,7 +80,7 @@ This is the **recommended way to start Orion**.
 
 ## 2. API Keys
 
-You need API keys for:
+The API keys for:
 
 * Groq (LLM)
 * Tavily (web search)
@@ -109,7 +109,7 @@ docker compose up --build
 
 ---
 
-## ☸️ Local Kubernetes Deployment (Minikube)
+## Local Kubernetes Deployment (Minikube)
 
 To spin up the cloud-scalable architecture locally on a Mac, ensure Minikube is installed and active, then apply all cluster manifests:
 
@@ -145,7 +145,7 @@ With both tunnels active, the automated Locust test harness seamlessly interacts
 
 --- 
 
-## 🧪 Performance Benchmarking & Load Testing
+## Performance Benchmarking & Load Testing
 
 To validate architectural scaling boundaries empirically, Orion relies on a dynamic, highly automated load-testing suite managed entirely inside the `./locust` directory.
 
@@ -180,15 +180,15 @@ Upon completion, the orchestration runner dynamically compiles raw metrics logs 
 
 ---
 
-# 🧪 Advanced Usage (Development + Testing)
+# Advanced Usage (Development + Testing)
 
-This section is only needed if you want to **modify internals, run components independently, or debug MCP behavior**.
+This section is for to **modify internals, run components independently, or debug MCP behavior**.
 
 ---
 
-## ⚠️ Full Development Setup Required
+## Full Development Setup Required
 
-To run any scripts or tests, you must have the full environment set up:
+To run any scripts or tests, a full environment set up:
 
 ### 1. Docker Services
 
@@ -197,7 +197,7 @@ To run any scripts or tests, you must have the full environment set up:
 
 ### 2. API Keys
 
-You must configure:
+Configure:
 
 ```bash
 LLM_API_KEY=your_groq_api_key
@@ -220,13 +220,14 @@ pip install -r requirements.txt
 
 ---
 
-# 🧪 Testing Overview
+# Testing Overview
 
-Orion includes **~95% unit test coverage** across the core system.
+Orion includes **~95% unit test coverage** across the core system. The results can 
+be seen in `htmlcov/index.html`
 
 ---
 
-## 🧪 Unit Tests (Core System Validation)
+## Unit Tests (Core System Validation)
 
 Unit tests validate individual components in isolation:
 
@@ -241,7 +242,7 @@ This is the **main test suite for correctness and stability**.
 
 ---
 
-## 🧪 Scripts (System Utilities)
+## Scripts (System Utilities)
 
 The `scripts/` folder provides utilities for interacting with the system directly.
 
@@ -258,13 +259,13 @@ Example:
 ./scripts/run_test.sh
 ```
 
-You can also use scripts to run the API independently for debugging.
+Scripts can also be used to run the API independently for debugging.
 
 ---
 
-## 🔬 Integrated Tests (Full System Components)
+## Integrated Tests (Full System Components)
 
-The `tests/integrated/` suite allows you to run **each MCP system component independently**, including:
+The `tests/integrated/` suite runs **each MCP system component independently**, including:
 
 * MCP Client
 * MCP Server
@@ -288,7 +289,7 @@ python3 test.graph_executor.py
 
 ---
 
-# 🧠 Key Idea
+# Key Idea
 
 * **Frontend demo** → shows full system working end-to-end
 * **Unit tests (~95%)** → ensure core MCP logic is correct and stable
@@ -297,7 +298,7 @@ python3 test.graph_executor.py
 
 ---
 
-# ✅ Summary
+# Summary
 
 | Mode                      | Purpose                               |
 | ------------------------- | ------------------------------------- |
@@ -308,84 +309,3 @@ python3 test.graph_executor.py
 | tests/integrated          | Full MCP component-level debugging    |
 
 ---
-
-
-
-# ❌ What NOT to do
-
-Do NOT add:
-
-* folder-by-folder explanation (`domain/`, `infrastructure/`, etc.)
-* MCP client/server breakdown
-* DAG executor internals
-* tool registry explanation
-
-That will:
-
-* bloat the README
-* duplicate `/docs`
-* make onboarding worse
-
----
-
-# 📂 Where your “real code explanation” should go
-
-Put the full version here instead:
-
-## 👉 `/docs/system-architecture.md`
-
-That file should contain:
-
-* MCP lifecycle (planner → DAG → executor)
-* graph execution model
-* tool registry system
-* vector/db/web pipeline
-* real architecture diagrams
-
-That is your **engineering brain of the system**
-
----
-
-# 🧠 Simple rule (very important)
-
-| Location           | Purpose                     |
-| ------------------ | --------------------------- |
-| README.md          | “How do I run this?”        |
-| /docs              | “How does this work?”       |
-| api-gateway README | “How do I develop backend?” |
-
----
-
-# 🔥 Why this matters for your project specifically
-
-Your system is:
-
-* DAG-based
-* multi-tool orchestration
-* LLM-driven planning
-* modular infrastructure
-
-That means it is already **complex enough that duplication becomes dangerous fast**
-
-So you want:
-
-> minimal README
-> strong docs
-> clean separation of concerns
-
----
-
-# 👍 Final answer
-
-✔ Keep your README as-is
-✔ Add ONLY a tiny “System Design” pointer section
-✔ Put full modular architecture in `/docs`
-❌ Do NOT describe the codebase in the README
-
----
-
-If you want next step, I can help you:
-
-* design a **perfect `/docs` structure (like real system design docs)**
-* or compress your README even more into a “startup landing page style”
-* or make your repo look like a **production AI infra system (YC-style)**
