@@ -1,85 +1,56 @@
-Yes, Locust separates those two:
+### Configuring Concurrent Users and Ramp-Up Rate in Locust
 
-### 1. Number of users
+Locust defines the workload using two independent parameters: the **target number of concurrent users** and the **user spawn rate (ramp-up rate)**.
 
-This is your **maximum concurrent users** (the load level).
+#### Target Concurrent Users
 
-Example:
+The **number of users** specifies the maximum number of virtual users that will execute requests concurrently during the test. Once the target is reached, Locust maintains approximately that level of concurrency for the remainder of the test duration.
 
-```
+For example:
+
+```text
 Number of users: 100
 ```
 
-means:
+This configuration instructs Locust to maintain approximately **100 concurrent virtual users** throughout the execution of the workload.
 
-> Locust will eventually have 100 virtual users running at the same time.
+#### Ramp-Up Rate
 
----
+The **spawn rate** (or ramp-up rate) determines the rate at which virtual users are created until the target concurrency is reached.
 
-### 2. Ramp up (spawn rate)
+For example:
 
-This is **how quickly Locust creates those users**.
-
-Example:
-
-```
+```text
 Number of users: 100
-Ramp up: 10 users/sec
+Spawn rate: 10 users/second
 ```
 
-means:
+The resulting workload progresses as follows:
 
-```
-Time 0s     → 0 users
-Time 1s     → 10 users
-Time 2s     → 20 users
-Time 3s     → 30 users
+```text
+Time 0 s   →   0 users
+Time 1 s   →  10 users
+Time 2 s   →  20 users
+Time 3 s   →  30 users
 ...
-Time 10s    → 100 users
+Time 10 s  → 100 users
 ```
 
-After that, it maintains ~100 concurrent users for the duration.
+After the target of 100 concurrent users is reached, Locust continues executing the workload at approximately that concurrency level for the remainder of the test.
 
----
+### Experimental Workload Configuration
 
-For your Orion baseline, I would use:
+The baseline Orion evaluation may be performed using the following workload configurations:
 
-### Light load
+| Workload Level | Concurrent Users | Spawn Rate |  Duration |
+| -------------- | ---------------: | ---------: | --------: |
+| Light          |               50 |  5 users/s | 3 minutes |
+| Medium         |              100 | 10 users/s | 3 minutes |
+| Heavy          |              250 | 25 users/s | 3 minutes |
+| Stress         |              500 | 50 users/s | 3 minutes |
 
-```
-Users: 50
-Ramp up: 5 users/sec
-Duration: 3 minutes
-```
+In these experiments, the spawn rate serves only to control the transition from an idle system to the desired concurrency level. It is **not** considered an independent experimental variable and is therefore excluded from performance comparisons. Performance metrics should be collected only after the target concurrency has been established.
 
-### Medium load
+### Example Methodology Statement
 
-```
-Users: 100
-Ramp up: 10 users/sec
-Duration: 3 minutes
-```
-
-### Heavy load
-
-```
-Users: 250
-Ramp up: 25 users/sec
-Duration: 3 minutes
-```
-
-### Stress load
-
-```
-Users: 500
-Ramp up: 50 users/sec
-Duration: 3 minutes
-```
-
-The ramp-up is not part of your performance comparison. It only controls how quickly you reach the target concurrency.
-
-Your report should say something like:
-
-> "The monolithic Orion architecture was evaluated under 50, 100, 250, and 500 concurrent users with a ramp-up rate of 10% of the target concurrency per second."
-
-That makes the experiment reproducible.
+> The monolithic Orion architecture was evaluated under workloads of 50, 100, 250, and 500 concurrent virtual users. Each workload was configured with a spawn rate equal to 10% of the target concurrency per second and executed for a duration of three minutes. The spawn rate was selected solely to achieve a controlled transition to the target workload and was not treated as an experimental variable. This configuration enables reproducible performance evaluation across all workload levels.

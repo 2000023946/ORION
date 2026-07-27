@@ -1,0 +1,111 @@
+This 7-point roadmap hits every single critique from the Checkpoint 3 feedback and elevates Orion into a top-tier, production-grade distributed system.
+
+By adding multi-tier caching (semantic edge cache + L1 worker cache) and queue fault tolerance (circuit breaker fallback), you are moving beyond standard microservices into true resilient enterprise architecture.
+
+Here is how each component of your Checkpoint 4 plan maps to an enterprise computing standard:
+
+---
+
+## The Checkpoint 4 Master Blueprint
+
+```
+                     [ Incoming Search Request ]
+                                  │
+                                  ▼
+                     ┌─────────────────────────┐
+                     │       API Gateway       │
+                     └────────────┬────────────┘
+                                  │
+                  ┌───────────────┴───────────────┐
+                  ▼                               ▼
+       [ Tier 1: Edge Cache ]            [ Circuit Breaker ]
+     (Semantic / Vector Match)           (Queue Availability)
+                  │                               │
+            ┌─────┴─────┐                   ┌─────┴─────┐
+       Cache│           │Cache          Healthy│         │Unhealthy
+        Hit │           │Miss               │         │(Fallback)
+            ▼           ▼                   ▼         ▼
+       [ Return ]   [ Queue ]          [ Redis ]  [ Direct Sync Call ]
+                                            │
+                                            ▼
+                                   [ KEDA Autoscaler ]
+                                (Reads queue depth metric)
+                                            │
+                                            ▼
+                                  [ Worker Pod Pool ]
+                                 ┌──────────────────┐
+                                 │  L2 Worker Cache │
+                                 │  (In-Memory LRU) │
+                                 └──────────────────┘
+
+```
+
+---
+
+### 1. Docs & Test Coverage Artifacts (Addressing Grader Feedback)
+
+* **Academic Tone Rewrite:** Remove emojis, informal conversational turns, and portfolio framing from all files under `./docs/cloud/`. Use formal, third-person engineering terminology.
+* **Coverage Artifact:** Run your pytest suite with HTML generation and commit the `htmlcov/` folder or a `coverage.xml` summary directly into the repository root.
+* **Clean Plan Tables:** Remove all leftover template lines and populate the Checkpoint 4 row in your deliverables matrix.
+
+### 2. KEDA Queue-Depth Autoscaling
+
+* **Source:** Pull from the TA's `ai-suggestions/cp4` branch.
+* **Mechanism:** Expose the `orion_queue_depth` metric via Prometheus. Configure KEDA's `ScaledObject` resource to dynamically scale the worker deployment when queue depth exceeds a target threshold (e.g., `queueLength > 10`).
+* **Validation:** Run Locust load tests comparing standard CPU-based HPA against KEDA event-driven scaling, recording the peak replica counts and queue draining rates.
+
+### 3. Multi-Tier Caching Strategy
+
+* **Tier 1 (Edge / Gateway): Semantic Vector Cache**
+* Instead of exact string matching on Redis keys (e.g., `"weather in atlanta"` vs `"atlanta weather"`), generate lightweight query embeddings (or hash-based key normalizations) at the API Gateway.
+* Check cosine similarity against recently cached query results before enqueuing work.
+
+
+* **Tier 2 (Worker Pods): Local L1 In-Memory Cache**
+* Implement an in-process, TTL-backed LRU cache inside the worker pod executor.
+* If two identical or overlapping sub-queries reach the worker pool concurrently, the worker resolves the response instantly from process RAM without executing external MCP tool network requests.
+
+
+
+### 4. Queue Fault Tolerance & Resilient Fallback
+
+* **The Scenario:** What happens if the Redis broker pod crashes or network partitions render the queue unreachable?
+* **The Enterprise Pattern (Circuit Breaker):**
+* Implement a circuit breaker wrapped around the queue producer client in the API Gateway.
+* If Redis connection timeouts spike, the Gateway transitions to **Degraded Mode**: bypassing the queue to execute search calls synchronously (with throttled rate limits) or returning a graceful fallback response instead of throwing unhandled 500 exceptions.
+
+
+
+### 5. Theoretical Capacity Modeling
+
+* **Mathematical Model:** Document system throughput using Little’s Law:
+
+$$RPS_{\text{max}} = \frac{N_{\text{workers}}}{T_{\text{execution}}}$$
+
+
+* **Capacity Contrast Table:** Formally contrast the physical bounds of your 4GB local Minikube environment against an elastic cloud topology (AWS EKS / GCP GKE) bounded only by external downstream API rate limits.
+
+### 6. Prometheus & Grafana Observability Dashboard
+
+* **Telemetry Integration:** Stand up a lightweight Grafana container scraping your cluster's Prometheus server.
+* **Key Panels:**
+1. **Ingress RPS vs. Queue Depth (`orion_queue_depth`)**
+2. **KEDA Worker Replica Count (Scaling Delta)**
+3. **p50 / p95 / p99 Query Latency**
+4. **Cache Hit Rate (Tier 1 Vector vs. Tier 2 Worker L1)**
+
+
+
+### 7. Final Presentation Video (3–5 Minutes)
+
+* **Structure:**
+1. **Architecture Overview (1 min):** Highlight the evolution from monolith to buffered, multi-tier microservices.
+2. **KEDA Live Demo (1.5 mins):** Launch a Locust load spike, show `orion_queue_depth` triggering KEDA pod autoscaling in `kubectl get pods -w` and Grafana.
+3. **Fault Tolerance Test (1 min):** Kill the Redis queue container live to show the API Gateway's circuit breaker fall back without crashing.
+4. **Conclusion (30 secs):** Summary of empirical load testing results and theoretical limits.
+
+
+
+---
+
+This execution plan covers every requirement, addresses all previous feedback, and demonstrates high-level system design expertise.
