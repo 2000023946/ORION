@@ -1,43 +1,46 @@
-### **Load Test Analysis: The "Microservice Tax" on Constrained Hardware**
-
-**Objective:** To evaluate system stability and resource consumption between an In-Memory (Monolithic) architecture and a Microservice architecture under heavy user load within a strict 4GB RAM environment.
-
----
-![In memory Vector DB Core Stats](microservice_core_stats.png)
-![Service Vector DB Core Stats](vector_db_service.png)
-
-#### **Executive Summary**
-
-The testing reveals a stark contrast in how systems fail under physical memory constraints. While microservices offer superior granular scaling in cloud environments, deploying them on severely restricted local hardware introduces an "infrastructure tax" that drastically accelerates system collapse.
-
-#### **Performance Comparison Matrix**
-
-| Metric | Scenario 1: In-Memory (The Sponge) | Scenario 2: Microservice (The Glass) |
-| --- | --- | --- |
-| **Architecture** | Shared 4GB RAM Pool | Sliced RAM (Standalone Vector DB) |
-| **Peak Latency** | ~50,000 ms (50 seconds) | ~0 ms *(False positive due to crash)* |
-| **Throughput** | Bottlenecked (Queuing) | 500+ req/s *(Error generation rate)* |
-| **Failure Count** | ~1,700 (Network Timeouts) | 60,000+ (Hard Crashes) |
-| **System State** | Degraded but actively processing | **OOMKilled** (Complete collapse) |
 
 ---
 
-### **Detailed Findings**
+# Load Test Analysis: Memory Constraints and Microservice Overhead
 
-#### **1. The "Sponge" Model (In-Memory Monolith)**
+![In-Memory Vector DB Core Statistics](microservice_core_stats.png)
 
-By sharing the global 4GB memory pool, the system utilized available RAM dynamically without rigid container boundaries.
+![Vector DB Microservice Core Statistics](vector_db_service.png)
 
-* **Behavior:** The system absorbed massive traffic spikes by aggressively queuing incoming requests.
-* **Outcome:** The system bent but did not break. While response times degraded to nearly a minute at 1,000 users, the architecture fought to stay alive. The resulting ~1,700 failures were standard client-side timeouts, not server deaths.
+## Objective
 
-#### **2. The "Glass" Model (Standalone Microservice)**
+This study evaluates system stability, latency, and resource utilization between an in-memory monolithic architecture and a microservice architecture under heavy user load within a 4GB RAM environment.
 
-Extracting the vector database into a separate Kubernetes pod immediately locked up ~500 MB of the RAM pool, starving the API Gateway and Executor of their operational buffer.
+## Executive Summary
 
-* **Behavior:** Unable to queue requests dynamically, the system hit a hard memory wall and shattered instantly.
-* **The "Fast Failure" Trap:** At 2,000 users, the metrics presented a dangerous illusion: throughput spiked and latency dropped to zero. In reality, the Linux kernel had terminated the pods (`OOMKilled`) due to memory exhaustion. The "throughput" was actually the dead server instantly rejecting connections and firing off 500 `502 Bad Gateway` errors per second.
+The evaluation demonstrates the impact of architectural overhead under strict memory limitations. Although microservice architectures provide scalability and isolation benefits in cloud environments, additional runtime, container, and communication overhead can reduce system resilience on constrained hardware.
 
-### **Conclusion**
+## Performance Comparison
 
-On hardware strictly limited to 3.9 GB of RAM, a monolithic (or in-memory) architecture is mathematically more resilient. The overhead of an extra operating system layer, container runtime, and network serialization required by the standalone microservice is sufficient to push a constrained system into an Out-Of-Memory death spiral.
+| Metric        | In-Memory Monolith         | Microservice Architecture         |
+| ------------- | -------------------------- | --------------------------------- |
+| Architecture  | Shared 4GB memory pool     | Independent service allocation    |
+| Peak Latency  | ~50,000 ms                 | ~0 ms (affected by failure state) |
+| Throughput    | Limited by request queuing | High error response rate          |
+| Failure Count | ~1,700 request timeouts    | 60,000+ failed requests           |
+| System State  | Degraded but operational   | OOMKilled                         |
+
+## Findings
+
+### In-Memory Architecture
+
+The monolithic architecture shared available memory across system components, allowing resources to be allocated dynamically. Under heavy load, the system maintained operation by increasing request queue depth, resulting in high latency but continued processing.
+
+### Microservice Architecture
+
+The microservice deployment introduced additional memory consumption from container isolation, independent runtimes, and service communication overhead. The dedicated vector database service reduced available resources for other components, causing memory exhaustion and service termination.
+
+The observed near-zero latency and increased throughput during failure conditions were not representative of successful processing. Instead, they resulted from rapid request rejection after services were terminated by the operating system.
+
+## Conclusion
+
+Under a 4GB RAM constraint, the monolithic architecture demonstrated higher resilience due to reduced infrastructure overhead and shared resource utilization. Microservice architectures remain effective for scalable cloud deployments; however, their additional operational costs must be considered when deployed on resource-limited systems.
+
+---
+
+

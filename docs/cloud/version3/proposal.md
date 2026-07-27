@@ -1,19 +1,58 @@
-## **Version 3 Proposal: Dedicated Vector Storage Service**
+## Version 3 Proposal: Dedicated Vector Storage Service
 
-### **Objective**
+### Objective
 
-Transition the FAISS vector index from an embedded, in-memory dependency within the Core Engine to an independent, network-addressable Docker service to support enterprise-scale data volumes.
+Separate the FAISS vector index from the Core Engine by deploying it as an independent service. This allows the orchestration engine and vector database to scale independently while improving memory efficiency.
 
-### **The Architectural Shift: Preventing Memory Exhaustion**
+---
 
-In a production Enterprise Search MCP, the vector database will scale to hold millions of embeddings.
+### Current Limitation
 
-* **The Fatal Flaw of In-Memory:** High-dimensional vectors consume massive amounts of RAM. If FAISS remains embedded in the Core Engine, the engine will quickly exceed its memory limits and be killed by the operating system (OOM kill). Furthermore, it forces a scaling paradox: you cannot horizontally scale your lightweight, stateless orchestration logic without duplicating a massive, multi-gigabyte RAM footprint for every new pod.
-* **Proposed State (V3):** The Core Engine treats vector search as an external I/O-bound network call. A dedicated Docker container is provisioned on specialized, memory-optimized infrastructure to hold the massive FAISS index, completely insulating the Core Engine from RAM spikes.
+In large enterprise deployments, the vector database may contain millions of embeddings.
 
-### **Implementation Strategy**
+When FAISS is embedded directly within the Core Engine:
 
-1. **The Wrapper Service:** FAISS will be wrapped in a high-performance, asynchronous web server (FastAPI or gRPC) inside its own Docker image, turning the C++ library into a queryable network database.
-2. **Persistent Storage:** To prevent the multi-gigabyte index from being wiped or rebuilt on container restart, the `.index` files must be mapped to a persistent Docker Volume on the host.
-3. **Asymmetric Hardware Allocation:** By isolating the service, Kubernetes or Docker Swarm can allocate memory-optimized nodes (high RAM, lower CPU) strictly for the Vector Store, while deploying the Core Engine on standard compute nodes.
+* Memory usage increases as the index grows.
+* Large indexes consume significant RAM and increase the risk of out-of-memory (OOM) failures.
+* Every additional Core Engine replica duplicates the entire vector index, resulting in unnecessary memory consumption and inefficient horizontal scaling.
 
+---
+
+### Proposed Architecture
+
+The Core Engine treats vector search as an external service rather than an in-process library.
+
+```text
+Core Engine
+      │
+      ▼
+Vector Storage Service (FAISS)
+      │
+      ▼
+Persistent Vector Index
+```
+
+The Vector Storage Service maintains the FAISS index and processes similarity search requests, while the Core Engine communicates with it through HTTP or gRPC.
+
+---
+
+### Benefits
+
+* **Independent Scaling** – The Core Engine and vector service can scale separately.
+* **Reduced Memory Usage** – Executor instances no longer load large vector indexes into memory.
+* **Persistent Storage** – Vector indexes remain available across container restarts.
+* **Flexible Infrastructure** – Memory-intensive vector storage can be deployed on high-memory nodes, while the Core Engine runs on standard compute nodes.
+
+---
+
+### Implementation
+
+1. Wrap FAISS inside a lightweight FastAPI or gRPC service.
+2. Store the FAISS index on a persistent Docker volume.
+3. Configure the Core Engine to perform vector search through the dedicated service instead of accessing FAISS directly.
+
+---
+
+### Expected Outcome
+
+By externalizing vector storage, the Core Engine becomes a lightweight, stateless service that scales efficiently, while the Vector Storage Service independently manages large embedding indexes and memory-intensive similarity search operations. This architecture improves scalability, resource utilization, and maintainability for enterprise-scale deployments.
