@@ -15,10 +15,10 @@ API_ENDPOINT = "http://localhost:8000/search"
 
 # Define your test phases: list of tuples (RPS, duration_in_seconds)
 TEST_PLAN = [
-    (.33, 90),
-    (.66, 90),
-    (1, 90),
     (2, 90),
+    (4, 90),
+    (8, 90),
+    (16, 90),
 ]
 
 COOLDOWN_SECONDS = 15  # Time to wait between tests to let queues drain

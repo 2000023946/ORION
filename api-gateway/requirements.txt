@@ -22,6 +22,8 @@ pytest-cov
 
 locust
 
+uvloop
+
 
 prometheus-fastapi-instrumentator
 

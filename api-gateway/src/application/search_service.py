@@ -1,4 +1,5 @@
 import asyncio
+import uvloop
 import logging
 from traceback import print_exc
 
@@ -6,6 +7,8 @@ from src.application.bus.search_task_bus import SearchTaskBus
 from src.application.search_use_case import SearchUseCase
 from src.application.bus.search_task_response import SearchTaskResponse
 
+# Swap the default asyncio event loop with the high-performance Cython/libuv engine
+uvloop.install()
 
 class SearchService:
     def __init__(self, use_case: SearchUseCase, task_bus: SearchTaskBus) -> None:
@@ -39,7 +42,8 @@ class SearchService:
                 self._is_running = False
                 break
             except Exception as e:
-                pass
+                logging.error(f"Error in execution loop polling tasks: {e}")
+                print_exc()
             
     async def _process_and_publish(self, task):
         try:
@@ -56,7 +60,8 @@ class SearchService:
             await self.task_bus.publish(task_response)
         except Exception as e:
             # Handle failure for this specific task
-            pass
+            logging.error(f"Task processing failed for request {getattr(task, 'request_id', 'unknown')}: {e}")
+            print_exc()
 
         
     def stop(self):

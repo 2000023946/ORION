@@ -1,5 +1,7 @@
 import asyncio
 from collections import deque
+import uvloop
+
 
 from src.constants.constants import START_TOOL, END_TOOL
 from src.domain.context import Context
@@ -14,6 +16,7 @@ from src.ports.graph_executer_port import GraphExecutorPort
 from src.ports.mcp_server_port import MCPServerPort
 from src.ports.tool_response import ToolResponse
 
+uvloop.install()
 
 class RealGraphExecuter(GraphExecutorPort):
 
