@@ -26,3 +26,13 @@ Once both images are pushed, roll out the updates in your cluster so Kubernetes 
 kubectl rollout restart deployment api-gateway
 kubectl rollout restart deployment orion-executor
 ```
+
+
+### 4. Forward API and Prometheus Port for Clients
+
+```bash
+kubectl port-forward deployment/prometheus-deployment 9090:9090
+kubectl port-forward deployment/api-gateway 8000:8000
+```
+
+

@@ -1,4 +1,5 @@
 import asyncio
+from src.metrics.decorator import measure
 import uvloop
 import logging
 from traceback import print_exc
@@ -44,7 +45,8 @@ class SearchService:
             except Exception as e:
                 logging.error(f"Error in execution loop polling tasks: {e}")
                 print_exc()
-            
+                
+    @measure("SearchResponse")
     async def _process_and_publish(self, task):
         try:
             response = await self.use_case.run(task.query)
