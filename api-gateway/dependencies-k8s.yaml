@@ -59,7 +59,7 @@ spec:
         - containerPort: 80
         env:
         - name: PROMETHEUS_PORT
-          value: "8081" # Overrides the K8s service injection with a valid integer port
+          value: "8081"
 ---
 apiVersion: v1
 kind: Service
@@ -93,6 +93,10 @@ data:
       - job_name: 'api-gateway'
         static_configs:
           - targets: ['api-gateway:8000']
+
+      - job_name: 'redis-exporter'
+        static_configs:
+          - targets: ['redis-exporter:9121']
 ---
 apiVersion: v1
 kind: Service
@@ -163,10 +167,10 @@ spec:
         resources:
           requests:
             cpu: "100m"
-            memory: "512Mi"  # Lowered so Minikube can actually schedule it
+            memory: "512Mi"
           limits:
             cpu: "1"
-            memory: "4Gi"    # Safe ceiling for local testing
+            memory: "4Gi"
 ---
 apiVersion: v1
 kind: Service
@@ -185,6 +189,7 @@ spec:
       port: 6334
       targetPort: 6334
 
+---
 # ==========================================
 # 5. Redis Task Bus (Message Broker)
 # ==========================================
@@ -207,8 +212,6 @@ spec:
         image: redis:latest
         ports:
         - containerPort: 6379
-        # Optional but recommended: Add a basic health probe so Kubernetes 
-        # knows when the broker is actually ready to accept queue traffic.
         livenessProbe:
           exec:
             command: ["redis-cli", "ping"]
@@ -226,3 +229,46 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+
+---
+# ==========================================
+# 6. Redis Exporter & Service
+# ==========================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-exporter
+    spec:
+      containers:
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        env:
+        - name: REDIS_ADDR
+          value: "redis://orion-redis:6379"  # Fixed to match your exact Redis service name
+        args:
+          - "-check-keys=orion_queue"        # Tracks LLEN/size for your task queue key
+        ports:
+        - containerPort: 9121
+          name: metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-exporter
+spec:
+  selector:
+    app: redis-exporter
+  ports:
+    - protocol: TCP
+      port: 9121
+      targetPort: 9121

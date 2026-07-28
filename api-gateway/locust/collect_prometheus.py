@@ -85,6 +85,24 @@ def get_component_memory(component: str):
 
 
 
+def get_redis_queue_size():
+    """
+    Query the Redis task queue size metric from Prometheus.
+    """
+    query = 'redis_key_size{key="orion_queue"}'
+    
+    result = query_prometheus(query)
+
+    if not result:
+        return 0.0
+
+    return round(
+        float(result[0]["value"][1]),
+        2
+    )
+
+
+
 def get_components():
 
     query = """
@@ -112,6 +130,8 @@ def export_csv(filename):
     components = get_components()
 
     rows = []
+    current_timestamp = datetime.now().isoformat()
+    redis_queue_size = get_redis_queue_size()
 
     for component in components:
 
@@ -121,10 +141,11 @@ def export_csv(filename):
 
         rows.append(
             {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": current_timestamp,
                 "component": component,
                 "avg_latency_ms": latency,
-                "memory_mb": memory
+                "memory_mb": memory,
+                "redis_queue_size": redis_queue_size
             }
         )
 
@@ -141,7 +162,8 @@ def export_csv(filename):
                 "timestamp",
                 "component",
                 "avg_latency_ms",
-                "memory_mb"
+                "memory_mb",
+                "redis_queue_size"
             ]
         )
 
@@ -152,7 +174,7 @@ def export_csv(filename):
 
 
     print(
-        f"Metrics exported to {filename}"
+        f"Metrics (including Redis queue size: {redis_queue_size}) exported to {filename}"
     )
 
 

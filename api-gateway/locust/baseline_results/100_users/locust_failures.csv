@@ -1,4 +1,0 @@
-Method,Name,Error,Occurrences,First Seen,Last Seen
-POST,/search,CatchResponseError('Failed: 0 - '),12,2026-07-27T20:41:10Z,2026-07-27T20:41:18Z
-POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Timeout connecting to server""}')",8,2026-07-27T20:39:36Z,2026-07-27T20:39:38Z
-POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",1960,2026-07-27T20:39:27Z,2026-07-27T20:41:25Z

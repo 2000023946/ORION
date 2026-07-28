@@ -87,9 +87,8 @@ async def search(req: SearchRequest):
                 metadata=metadata
             )
     except Exception as e:
-        # If the cache fails (e.g., Redis blips), log it but DO NOT crash the API.
-        # Gracefully fall through to the normal queue flow.
-        pass
+        # Raise the cache exception immediately to expose connection issues
+        raise HTTPException(status_code=500, detail=f"Cache Error: {str(e)}")
     # ---------------------------------------------------------
 
     # 3. Generate a globally unique ID for this specific web request
@@ -116,8 +115,7 @@ async def search(req: SearchRequest):
             try:
                 await cache_infras.cache.set_answer(query, bus_result)
             except Exception as e:
-                pass
-                # If the cache write fails, just log it. Don't crash the user's request!
+                raise HTTPException(status_code=500, detail=f"Cache Write Error: {str(e)}")
         # ---------------------------------------------------------
         
         # 7. Map the internal Bus Response back to the external HTTP Response
@@ -132,6 +130,9 @@ async def search(req: SearchRequest):
         # If the timeout is breached, return a 504 Gateway Timeout
         raise HTTPException(status_code=504, detail=str(e))
         
+    except HTTPException:
+        raise
+        
     except Exception as e:
-        # Catch any Redis connection failures or unexpected crashes
+        # Catch any Redis connection failures or unexpected crashes and raise them explicitly
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")

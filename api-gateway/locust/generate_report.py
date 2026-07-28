@@ -189,18 +189,18 @@ def parse_locust_log(log_text):
 
 
 def parse_prometheus_csv(path):
-
     """
-    Read component latency metrics.
+    Read component latency, memory metrics, and redis queue size.
     """
-
 
     components = defaultdict(
         lambda:{
-            "latency":[],
-            "memory":[]
+            "latency": [],
+            "memory": []
         }
     )
+    
+    redis_queue_values = []
 
 
     with open(path) as file:
@@ -210,25 +210,27 @@ def parse_prometheus_csv(path):
 
         for row in reader:
 
-
             component = row["component"]
-
 
             components[component]["latency"].append(
                 float(row["avg_latency_ms"])
             )
 
-
             components[component]["memory"].append(
                 float(row["memory_mb"])
             )
 
+            # Capture redis queue size if column exists in the CSV
+            if "redis_queue_size" in row and row["redis_queue_size"]:
+                try:
+                    redis_queue_values.append(float(row["redis_queue_size"]))
+                except ValueError:
+                    pass
 
 
-    results=[]
+    results = []
 
-
-    for component,data in components.items():
+    for component, data in components.items():
 
         results.append({
 
@@ -236,217 +238,131 @@ def parse_prometheus_csv(path):
 
             "latency":
                 sum(data["latency"]) /
-                len(data["latency"]),
-
+                len(data["latency"]) if data["latency"] else 0.0,
 
             "memory":
                 sum(data["memory"]) /
-                len(data["memory"])
+                len(data["memory"]) if data["memory"] else 0.0
 
         })
 
+    # Calculate average Redis queue size for the run
+    avg_redis_queue = (
+        sum(redis_queue_values) / len(redis_queue_values)
+        if redis_queue_values
+        else 0.0
+    )
 
 
     return sorted(
         results,
-        key=lambda x:x["latency"],
+        key=lambda x: x["latency"],
         reverse=True
-    )
+    ), avg_redis_queue
 
 
 
-def generate_html(data, components, output_file):
+def generate_html(data, components, avg_redis_queue, output_file):
 
-
-    component_rows=""
-
+    component_rows = ""
 
     for c in components:
 
         component_rows += f"""
-
 <tr>
-
 <td>{c['component']}</td>
-
 <td>{c['latency']:.2f}</td>
-
 <td>{c['memory']:.2f}</td>
-
 </tr>
-
 """
 
 
-    html=f"""
-
+    html = f"""
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
 <title>
 Locust Load Test Report
 </title>
-
-
 <style>
-
-
 body {{
-
-font-family:
-Arial,
-Helvetica,
-sans-serif;
-
-background:#f4f6f8;
-
-padding:30px;
-
-color:#333;
-
+font-family: Arial, Helvetica, sans-serif;
+background: #f4f6f8;
+padding: 30px;
+color: #333;
 }}
-
-
 .container {{
-
-background:white;
-
-padding:30px;
-
-border-radius:10px;
-
-max-width:1200px;
-
-margin:auto;
-
+background: white;
+padding: 30px;
+border-radius: 10px;
+max-width: 1200px;
+margin: auto;
 }}
-
-
-
-h1,h2 {{
-
-color:#2c3e50;
-
+h1, h2 {{
+color: #2c3e50;
 }}
-
-
-
 table {{
-
-width:100%;
-
-border-collapse:collapse;
-
-margin-bottom:35px;
-
+width: 100%;
+border-collapse: collapse;
+margin-bottom: 35px;
 }}
-
-
-
 th {{
-
-background:#34495e;
-
-color:white;
-
-padding:12px;
-
+background: #34495e;
+color: white;
+padding: 12px;
 }}
-
-
-
 td {{
-
-padding:10px;
-
-border-bottom:1px solid #ddd;
-
-text-align:center;
-
+padding: 10px;
+border-bottom: 1px solid #ddd;
+text-align: center;
 }}
-
-
-
 tr:nth-child(even) {{
-
-background:#f9f9f9;
-
+background: #f9f9f9;
 }}
-
-
-
 .summary {{
-
-background:#eaf6ff;
-
-padding:15px;
-
-border-left:5px solid #3498db;
-
+background: #eaf6ff;
+padding: 15px;
+border-left: 5px solid #3498db;
+margin-bottom: 25px;
 }}
-
-
 </style>
-
-
 </head>
-
-
 <body>
 
-
 <div class="container">
-
 
 <h1>
 Locust Load Test Report
 </h1>
 
-
-
 <div class="summary">
-
-
 <h2>
 Test Execution Details
 </h2>
-
-
 <p>
 <b>Target Load:</b>
 {data['users']} users
 </p>
-
-
 <p>
 <b>Spawn Rate:</b>
 {data['rate']} users/second
 </p>
-
-
+<p>
+<b>Average Redis Queue Depth (`orion_queue`):</b>
+{avg_redis_queue:.2f} items
+</p>
 <p>
 <b>Status:</b>
 Completed
 </p>
-
-
 </div>
-
-
 
 <h2>
 Request Statistics
 </h2>
 
-
 <table>
-
-
 <tr>
-
 <th>Type</th>
 <th>Name</th>
 <th>Requests</th>
@@ -457,52 +373,29 @@ Request Statistics
 <th>Median(ms)</th>
 <th>Req/s</th>
 <th>Failures/s</th>
-
 </tr>
-
-
 
 <tr>
-
 <td>POST</td>
-
 <td>/search</td>
-
 <td>{data['stats']['reqs']}</td>
-
 <td>{data['stats']['fails']} ({data['stats']['fail_pct']}%)</td>
-
 <td>{data['stats']['avg']}</td>
-
 <td>{data['stats']['min']}</td>
-
 <td>{data['stats']['max']}</td>
-
 <td>{data['stats']['median']}</td>
-
 <td>{data['stats']['req_s']}</td>
-
 <td>{data['stats']['fail_s']}</td>
-
 </tr>
-
-
 </table>
-
-
-
 
 
 <h2>
 Response Time Percentiles
 </h2>
 
-
 <table>
-
-
 <tr>
-
 <th>50%</th>
 <th>66%</th>
 <th>75%</th>
@@ -514,108 +407,60 @@ Response Time Percentiles
 <th>99.9%</th>
 <th>99.99%</th>
 <th>100%</th>
-
 </tr>
-
 
 <tr>
-
 <td>{data['percentiles']['p50']} ms</td>
-
 <td>{data['percentiles']['p66']} ms</td>
-
 <td>{data['percentiles']['p75']} ms</td>
-
 <td>{data['percentiles']['p80']} ms</td>
-
 <td>{data['percentiles']['p90']} ms</td>
-
 <td>{data['percentiles']['p95']} ms</td>
-
 <td>{data['percentiles']['p98']} ms</td>
-
 <td>{data['percentiles']['p99']} ms</td>
-
 <td>{data['percentiles']['p999']} ms</td>
-
 <td>{data['percentiles']['p9999']} ms</td>
-
 <td>{data['percentiles']['p100']} ms</td>
-
 </tr>
-
-
 </table>
-
-
-
 
 
 <h2>
 Component Performance
 </h2>
 
-
 <table>
-
-
 <tr>
-
-<th>
-Component
-</th>
-
-<th>
-Average Latency(ms)
-</th>
-
-<th>
-Memory(MB)
-</th>
-
-
+<th>Component</th>
+<th>Average Latency(ms)</th>
+<th>Memory(MB)</th>
 </tr>
-
 
 {component_rows}
 
-
 </table>
-
-
-
 
 </div>
 
-
 </body>
-
-
 </html>
-
 """
 
 
-    with open(output_file,"w") as f:
-
+    with open(output_file, "w") as f:
         f.write(html)
 
-
-
-    print(
-        f"Report generated: {output_file}"
-    )
+    print(f"Report generated: {output_file}")
 
 
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
-
-    if len(sys.argv)!=4:
+    if len(sys.argv) != 4:
 
         print(
-            "Usage:"
+            "Usage: "
             "python generate_report.py "
             "<locust_output.txt> "
             "<prometheus_metrics.csv> "
@@ -625,13 +470,9 @@ if __name__=="__main__":
         sys.exit(1)
 
 
-
-    locust_file=sys.argv[1]
-
-    prometheus_file=sys.argv[2]
-
-    output_directory=sys.argv[3]
-
+    locust_file = sys.argv[1]
+    prometheus_file = sys.argv[2]
+    output_directory = sys.argv[3]
 
 
     os.makedirs(
@@ -640,31 +481,26 @@ if __name__=="__main__":
     )
 
 
-
     with open(locust_file) as f:
-
-        log=f.read()
-
+        log = f.read()
 
 
-    locust_data=parse_locust_log(log)
+    locust_data = parse_locust_log(log)
 
-
-    component_data=parse_prometheus_csv(
+    component_data, avg_redis_queue = parse_prometheus_csv(
         prometheus_file
     )
 
 
-
-    output_file=os.path.join(
+    output_file = os.path.join(
         output_directory,
         "locust_report.html"
     )
 
 
-
     generate_html(
         locust_data,
         component_data,
+        avg_redis_queue,
         output_file
     )

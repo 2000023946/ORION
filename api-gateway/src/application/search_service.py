@@ -18,40 +18,47 @@ class SearchService:
         Starts the infinite worker loop to consume tasks from the queue 
         and process them through the Search Use Case.
         """
+        # We move the actual processing into a separate helper method
         self._is_running = True
         
         while self._is_running:
             try:
-                
-                # 1. Poll task from the task bus (yields control to event loop while empty)
+                # 1. Poll task from the task bus
                 task = await self.task_bus.pop_task()
                 if not task:
                     continue
-                    
                 
-                # 2. Call the Use Case
-                response = await self.use_case.run(task.query)
-                # 3. Construct the Response payload for the Bus
-                # Note: We extract the answer from the SearchResponse domain object.
-                task_response = SearchTaskResponse(
-                    request_id=task.request_id,
-                    answer=response.answer,
-                    success=response.success,
-                    error=response.error,
-                    metadata=response.metadata
-                )
+                # 2. Fire and forget! 
+                # This schedules the work in the background and instantly moves to the next line.
+                asyncio.create_task(self._process_and_publish(task))
                 
-                # 4. Publish the result back to the Gateway
-                await self.task_bus.publish(task_response)
+                # 3. The loop instantly restarts and grabs the next task from Redis, 
+                # even though the previous task is still waiting for the API!
                 
             except asyncio.CancelledError:
-                # Allows the worker to shut down gracefully when Kubernetes terminates the pod
                 self._is_running = False
                 break
             except Exception as e:
-                # Catch unexpected errors so the worker doesn't crash permanently
-                # (Optional but recommended: publish a failure response back to the Gateway here)
                 pass
+            
+    async def _process_and_publish(self, task):
+        try:
+            response = await self.use_case.run(task.query)
+            
+            task_response = SearchTaskResponse(
+                request_id=task.request_id,
+                answer=response.answer,
+                success=response.success,
+                error=response.error,
+                metadata=response.metadata
+            )
+            
+            await self.task_bus.publish(task_response)
+        except Exception as e:
+            # Handle failure for this specific task
+            pass
+
+        
     def stop(self):
         """Signals the worker to stop processing new tasks."""
         self._is_running = False

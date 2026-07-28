@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>K8s Baseline Suite Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h2 { color: #38bdf8; border-bottom: 2px solid #334155; padding-bottom: 10px; }
+        .summary-card { background: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 40px; }
+        .run-section { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 40px; border: 1px solid #334155; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-box { background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .stat-box h4 { margin: 0 0 5px 0; font-size: 12px; color: #94a3b8; text-transform: uppercase; }
+        .stat-box .val { font-size: 20px; font-weight: bold; color: #f1f5f9; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        canvas { background: #0f172a; border-radius: 8px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Kubernetes Microservice Load Test Suite</h1>
+        
+        <!-- MASTER COMPARISON -->
+        <div class="summary-card">
+            <h2>Master Summary Comparison</h2>
+            <canvas id="summaryChart" style="max-height: 400px;"></canvas>
+        </div>
+
+        <div class="run-section">
+            <h2>0.33 RPS Run (90s)</h2>
+            <div class="metrics-grid">
+                <div class="stat-box"><h4>Total Requests</h4><div class="val">30</div></div>
+                <div class="stat-box"><h4>Success Rate</h4><div class="val" style="color: #4ade80;">100.0%</div></div>
+                <div class="stat-box"><h4>Avg Latency</h4><div class="val" style="color: #38bdf8;">2726.3 ms</div></div>
+                <div class="stat-box"><h4>Max Queue</h4><div class="val" style="color: #a855f7;">0</div></div>
+            </div>
+            <div class="chart-row">
+                <div><canvas id="lat_0"></canvas></div>
+                <div><canvas id="q_0"></canvas></div>
+            </div>
+        </div>
+        
+        <div class="run-section">
+            <h2>0.66 RPS Run (90s)</h2>
+            <div class="metrics-grid">
+                <div class="stat-box"><h4>Total Requests</h4><div class="val">60</div></div>
+                <div class="stat-box"><h4>Success Rate</h4><div class="val" style="color: #4ade80;">100.0%</div></div>
+                <div class="stat-box"><h4>Avg Latency</h4><div class="val" style="color: #38bdf8;">2615.0 ms</div></div>
+                <div class="stat-box"><h4>Max Queue</h4><div class="val" style="color: #a855f7;">3</div></div>
+            </div>
+            <div class="chart-row">
+                <div><canvas id="lat_1"></canvas></div>
+                <div><canvas id="q_1"></canvas></div>
+            </div>
+        </div>
+        
+        <div class="run-section">
+            <h2>1 RPS Run (90s)</h2>
+            <div class="metrics-grid">
+                <div class="stat-box"><h4>Total Requests</h4><div class="val">90</div></div>
+                <div class="stat-box"><h4>Success Rate</h4><div class="val" style="color: #4ade80;">100.0%</div></div>
+                <div class="stat-box"><h4>Avg Latency</h4><div class="val" style="color: #38bdf8;">2559.1 ms</div></div>
+                <div class="stat-box"><h4>Max Queue</h4><div class="val" style="color: #a855f7;">1</div></div>
+            </div>
+            <div class="chart-row">
+                <div><canvas id="lat_2"></canvas></div>
+                <div><canvas id="q_2"></canvas></div>
+            </div>
+        </div>
+        
+        <div class="run-section">
+            <h2>2 RPS Run (90s)</h2>
+            <div class="metrics-grid">
+                <div class="stat-box"><h4>Total Requests</h4><div class="val">178</div></div>
+                <div class="stat-box"><h4>Success Rate</h4><div class="val" style="color: #4ade80;">100.0%</div></div>
+                <div class="stat-box"><h4>Avg Latency</h4><div class="val" style="color: #38bdf8;">2829.3 ms</div></div>
+                <div class="stat-box"><h4>Max Queue</h4><div class="val" style="color: #a855f7;">6</div></div>
+            </div>
+            <div class="chart-row">
+                <div><canvas id="lat_3"></canvas></div>
+                <div><canvas id="q_3"></canvas></div>
+            </div>
+        </div>
+        </div>
+    <script>
+        // --- Summary Chart ---
+        new Chart(document.getElementById('summaryChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['0.33 RPS', '0.66 RPS', '1 RPS', '2 RPS'],
+                datasets: [
+                    { label: 'Avg Latency (ms)', data: [2726.3396666666667, 2615.0333333333333, 2559.129, 2829.2680337078655], backgroundColor: '#38bdf8', yAxisID: 'y' },
+                    { label: 'Max Queue Depth', data: [0, 3, 1, 6], backgroundColor: '#a855f7', yAxisID: 'y1' }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Latency (ms)' } },
+                    y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Queue Depth' }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    
+        new Chart(document.getElementById('lat_0').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.0, 3.04, 6.07, 9.11, 12.14, 15.18, 18.22, 21.26, 24.29, 27.33, 30.37, 33.4, 36.44, 39.47, 42.5, 45.54, 48.58, 51.61, 54.64, 57.68, 60.71, 63.75, 66.79, 69.83, 72.86, 75.9, 78.94, 81.97, 85.01, 88.04], datasets: [{ label: 'Latency (ms)', data: [2964.22, 3024.23, 2170.34, 3354.5, 3959.11, 3351.33, 2211.4, 2022.72, 1816.37, 3113.46, 2308.68, 3335.96, 2453.04, 1912.54, 3223.48, 2130.98, 3123.88, 1913.82, 2992.15, 1906.97, 3359.83, 3233.47, 3548.81, 3024.2, 2192.6, 3177.63, 3176.29, 2020.26, 2503.13, 2264.79], borderColor: '#38bdf8', borderWidth: 1, pointRadius: 1 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        new Chart(document.getElementById('q_0').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.41, 1.7, 2.91, 4.2, 5.48, 6.74, 8.03, 9.27, 10.53, 11.85, 13.1, 16.87, 18.17, 19.43, 20.68, 21.93, 23.13, 24.42, 25.7, 26.95, 28.14, 29.46, 30.97, 32.13, 33.37, 34.57, 35.8, 37.1, 38.28, 39.55, 40.8, 42.06, 43.33, 44.6, 45.89, 47.09, 48.34, 49.9, 51.15, 52.42, 53.6, 54.88, 56.17, 57.5, 58.71, 59.95, 61.17, 62.49, 63.82, 65.19, 66.53, 67.77, 69.88, 71.14, 72.34, 73.62, 74.8, 76.04, 77.23, 78.49, 79.71, 80.96, 82.15, 83.42, 84.65, 85.9, 87.18, 88.45, 89.75], datasets: [{ label: 'Queue Depth', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], borderColor: '#a855f7', borderWidth: 2, pointRadius: 0, stepped: true }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        
+        new Chart(document.getElementById('lat_1').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.0, 1.53, 3.05, 6.09, 4.57, 7.61, 9.13, 10.65, 13.68, 12.16, 15.21, 16.72, 18.24, 19.76, 21.28, 22.8, 24.32, 27.38, 28.9, 30.43, 25.85, 31.95, 33.47, 34.99, 36.51, 38.03, 39.55, 41.07, 42.59, 44.11, 45.63, 47.15, 48.67, 50.19, 51.71, 53.23, 54.75, 56.27, 57.79, 59.31, 60.83, 62.35, 63.88, 66.92, 65.4, 68.44, 69.96, 71.48, 73.0, 74.52, 76.04, 77.56, 79.08, 80.61, 82.13, 86.75, 85.23, 83.75, 88.28, 89.8], datasets: [{ label: 'Latency (ms)', data: [2467.71, 2079.26, 2207.82, 1621.24, 3403.95, 1919.33, 1983.18, 2353.12, 1976.84, 3517.28, 1911.16, 1947.79, 1969.51, 2919.56, 1701.12, 2270.24, 6647.83, 4477.59, 3041.35, 1976.12, 6884.27, 3426.43, 3193.91, 1918.07, 1714.9, 1934.83, 3016.06, 2149.55, 1886.32, 2067.63, 2143.09, 1988.91, 1654.6, 2302.86, 3153.9, 3023.56, 3160.99, 2081.06, 1864.48, 2071.86, 2070.42, 2167.15, 2089.33, 2047.1, 3610.29, 1986.79, 1797.63, 2113.84, 3166.32, 1843.5, 2451.85, 2266.28, 1993.75, 1973.86, 3536.18, 1980.86, 3971.79, 5613.9, 2114.27, 4077.61], borderColor: '#38bdf8', borderWidth: 1, pointRadius: 1 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        new Chart(document.getElementById('q_1').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.31, 1.48, 2.71, 3.88, 5.06, 6.28, 7.47, 8.68, 9.87, 11.02, 12.33, 13.53, 14.77, 15.97, 17.24, 18.54, 19.78, 21.02, 22.22, 23.59, 29.51, 30.88, 32.17, 33.46, 34.67, 35.96, 37.52, 38.87, 40.17, 41.48, 42.72, 43.97, 45.14, 46.39, 47.6, 48.89, 50.14, 51.3, 52.59, 53.82, 55.12, 56.39, 57.59, 58.9, 60.18, 61.56, 62.85, 64.1, 65.74, 67.04, 68.29, 69.5, 70.76, 71.95, 73.24, 74.48, 75.77, 77.06, 78.48, 79.86, 81.18, 82.46, 85.99, 87.28, 88.53, 89.81], datasets: [{ label: 'Queue Depth', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], borderColor: '#a855f7', borderWidth: 2, pointRadius: 0, stepped: true }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        
+        new Chart(document.getElementById('lat_2').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.01, 1.02, 2.02, 4.04, 3.03, 5.04, 6.05, 7.05, 9.06, 8.06, 10.07, 11.07, 13.08, 12.08, 14.09, 16.1, 15.1, 17.11, 18.11, 19.11, 21.12, 20.12, 22.13, 23.13, 25.14, 24.13, 26.14, 27.14, 28.14, 29.15, 30.15, 32.17, 31.16, 33.17, 34.2, 35.2, 37.2, 36.2, 38.21, 39.24, 40.25, 42.27, 41.26, 44.27, 43.27, 45.27, 46.28, 48.29, 47.29, 49.3, 51.31, 50.3, 52.31, 54.32, 53.32, 55.33, 56.33, 57.33, 58.34, 60.34, 59.34, 61.34, 63.36, 62.34, 64.36, 65.37, 67.37, 66.37, 68.38, 69.38, 70.38, 71.39, 73.4, 72.39, 74.4, 75.4, 76.41, 77.41, 79.42, 78.41, 80.43, 82.43, 81.43, 83.44, 85.45, 84.44, 86.45, 87.45, 89.46, 88.45], datasets: [{ label: 'Latency (ms)', data: [3194.69, 3429.97, 3673.3, 2560.18, 3731.36, 2574.64, 2752.22, 2534.43, 2139.83, 3243.65, 2062.58, 1900.68, 2526.26, 3582.47, 3230.4, 1908.82, 3323.96, 3497.28, 2497.58, 2936.11, 1840.75, 3487.95, 3110.79, 2204.3, 1684.86, 3002.02, 2334.79, 1528.12, 1915.62, 1926.28, 3043.88, 1591.36, 3159.24, 2180.58, 2297.51, 1653.43, 3921.95, 4978.39, 4592.76, 3752.79, 3003.15, 1977.76, 3138.18, 2027.43, 3233.96, 2088.02, 2205.88, 2089.86, 3323.75, 1850.36, 1947.42, 3260.38, 2094.68, 1576.17, 2975.43, 2147.38, 2308.98, 1828.34, 2037.06, 1744.29, 2837.57, 2472.82, 2362.94, 3402.35, 1892.89, 2014.78, 1617.11, 3234.18, 2146.24, 2949.91, 3275.73, 2987.24, 2078.18, 3300.55, 2030.97, 2017.11, 2025.17, 1767.31, 1842.87, 3015.53, 1920.6, 2063.79, 3395.44, 1726.12, 1725.64, 3370.32, 1803.49, 1840.42, 1831.07, 3007.01], borderColor: '#38bdf8', borderWidth: 1, pointRadius: 1 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        new Chart(document.getElementById('q_2').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.68, 2.79, 4.43, 5.96, 7.47, 8.78, 9.98, 11.4, 12.83, 14.31, 15.93, 17.58, 19.09, 20.76, 22.01, 23.41, 24.68, 25.9, 27.09, 28.3, 29.56, 30.79, 32.1, 33.57, 34.85, 36.06, 37.41, 41.35, 42.63, 44.21, 45.62, 46.88, 48.17, 49.4, 50.58, 51.76, 52.99, 54.14, 55.35, 56.72, 57.92, 59.14, 60.34, 61.61, 62.81, 64.09, 65.35, 66.56, 67.79, 69.01, 70.2, 71.38, 72.72, 73.97, 75.32, 76.52, 77.71, 78.89, 80.15, 81.33, 82.55, 83.75, 84.95, 86.21, 87.43, 88.66, 89.82], datasets: [{ label: 'Queue Depth', data: [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], borderColor: '#a855f7', borderWidth: 2, pointRadius: 0, stepped: true }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        
+        new Chart(document.getElementById('lat_3').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.52, 1.02, 0.01, 1.52, 2.03, 2.53, 3.05, 3.56, 4.57, 5.07, 4.06, 6.08, 5.58, 6.59, 7.09, 7.6, 8.61, 9.11, 8.1, 10.62, 9.62, 10.12, 11.63, 11.13, 12.14, 12.64, 13.14, 13.65, 14.15, 15.66, 14.66, 16.17, 15.16, 16.67, 17.18, 17.68, 18.18, 18.69, 19.19, 19.7, 20.7, 20.2, 21.21, 21.71, 22.22, 23.23, 22.73, 24.24, 23.73, 25.26, 25.76, 24.74, 26.77, 27.28, 26.27, 27.78, 29.29, 28.29, 28.79, 29.8, 30.81, 30.3, 31.31, 32.32, 31.82, 33.37, 32.87, 34.89, 33.88, 34.39, 35.9, 36.41, 35.4, 37.42, 37.92, 36.91, 38.43, 39.44, 39.94, 38.94, 40.45, 41.46, 41.96, 42.46, 40.95, 42.97, 43.98, 44.48, 43.47, 44.99, 45.49, 46.0, 47.0, 46.5, 48.01, 47.51, 48.51, 49.53, 49.02, 50.03, 51.05, 50.54, 51.55, 52.56, 52.06, 53.57, 54.08, 55.09, 53.07, 54.58, 56.71, 58.25, 56.2, 57.73, 57.22, 59.76, 55.59, 59.26, 60.77, 61.78, 61.27, 58.75, 62.28, 62.79, 60.26, 63.79, 63.29, 64.8, 64.29, 65.8, 65.3, 66.8, 67.31, 66.3, 67.81, 68.32, 68.82, 69.83, 69.33, 70.84, 70.33, 71.35, 72.36, 71.85, 72.86, 73.37, 73.88, 74.38, 75.39, 75.9, 74.89, 76.4, 77.41, 76.91, 77.91, 78.42, 79.43, 80.94, 80.44, 78.92, 79.93, 81.45, 82.97, 82.46, 81.96, 83.47, 83.98, 84.49, 84.99, 85.5, 86.51, 86.01, 87.02, 87.52, 88.03, 88.54, 89.55, 89.04], datasets: [{ label: 'Latency (ms)', data: [2170.57, 2197.41, 3529.83, 3526.85, 3021.29, 3278.62, 2909.08, 2833.11, 2168.53, 1755.67, 2941.93, 2438.27, 3061.31, 2124.49, 1772.94, 2129.16, 1881.02, 1758.18, 2934.59, 1964.72, 3339.38, 3251.38, 1801.71, 2869.9, 2181.23, 1793.32, 1921.96, 1832.52, 2118.99, 1997.51, 3131.07, 1899.5, 3341.73, 1926.52, 3135.84, 3172.21, 3347.47, 3296.03, 3148.12, 3158.88, 2169.43, 3383.82, 3239.18, 2824.19, 2358.93, 2330.56, 3350.16, 1928.88, 2895.52, 2334.13, 2024.89, 3374.47, 1795.63, 1810.3, 3513.82, 2194.65, 1991.94, 3129.82, 3202.79, 2498.29, 1735.14, 2288.1, 2024.17, 2167.92, 3642.41, 2167.3, 3610.26, 1912.56, 3062.21, 3181.1, 2292.85, 1972.15, 3005.31, 1857.97, 1868.6, 3072.81, 1813.96, 1898.62, 1619.81, 3059.93, 1881.63, 2097.38, 2111.99, 1717.28, 3451.34, 1815.89, 2237.98, 2018.64, 3133.88, 2326.83, 1990.41, 2028.38, 1773.02, 3296.78, 1929.77, 3304.79, 2911.15, 2339.35, 3188.41, 2647.81, 3706.99, 4239.54, 3298.2, 2336.21, 3061.82, 5107.69, 5969.49, 4958.35, 8441.65, 7106.85, 5694.84, 4245.53, 6373.67, 4964.85, 5549.47, 3030.02, 7202.63, 3613.27, 2728.13, 1969.19, 2523.48, 5099.89, 2015.58, 1552.46, 4452.84, 2139.6, 3083.04, 1725.63, 3304.17, 2027.8, 3124.54, 1817.04, 1993.58, 3041.74, 1963.07, 2306.23, 1876.18, 2082.71, 3292.43, 2266.28, 3332.64, 2570.31, 1994.42, 3015.65, 2004.71, 3446.23, 2941.84, 2830.4, 2658.02, 2189.67, 3957.84, 2473.21, 2988.25, 3490.87, 3603.65, 3153.33, 2404.43, 1718.63, 2271.8, 3844.0, 3104.92, 2122.71, 1876.15, 3046.26, 3554.24, 3067.27, 2631.4, 2140.65, 2247.87, 1911.08, 2411.18, 3095.62, 2214.6, 3273.17, 2768.94, 3847.38, 2834.4, 3415.16], borderColor: '#38bdf8', borderWidth: 1, pointRadius: 1 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        new Chart(document.getElementById('q_3').getContext('2d'), {
+            type: 'line',
+            data: { labels: [0.34, 1.52, 2.94, 4.95, 6.21, 7.61, 8.82, 10.05, 11.22, 12.5, 13.69, 14.93, 16.16, 17.51, 18.79, 20.05, 21.24, 22.43, 23.84, 25.42, 26.74, 28.08, 29.39, 30.79, 32.32, 33.62, 34.93, 36.23, 37.47, 38.67, 39.88, 41.42, 42.7, 43.88, 45.39, 46.7, 47.89, 49.13, 50.73, 52.01, 53.92, 55.51, 58.89, 61.55, 62.92, 64.13, 65.46, 66.7, 67.9, 69.2, 70.56, 71.95, 73.2, 74.64, 76.11, 77.45, 79.08, 80.73, 82.22, 83.47, 84.94, 86.23, 87.56, 89.04], datasets: [{ label: 'Queue Depth', data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 6, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], borderColor: '#a855f7', borderWidth: 2, pointRadius: 0, stepped: true }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { title: { display: true, text: 'Seconds' } } } }
+        });
+        </script></body></html>

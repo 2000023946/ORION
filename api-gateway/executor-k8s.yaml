@@ -5,7 +5,7 @@ metadata:
   labels:
     app: orion-executor
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: orion-executor
@@ -42,10 +42,10 @@ spec:
           value: "redis://orion-redis:6379/0"
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "250m"
+            memory: "256Mi"
           limits:
-            cpu: "500m"
+            cpu: "250m"
             memory: "256Mi"
 ---
 apiVersion: v1
@@ -77,7 +77,7 @@ spec:
     name: orion-executor
   minReplicaCount: 1
   # Capped at 4 to prevent your local macOS Minikube environment from locking up under heavy load testing
-  maxReplicaCount: 4
+  maxReplicaCount: 1
   pollingInterval: 15
   cooldownPeriod: 60
   triggers:

@@ -36,7 +36,13 @@ class RedisSearchTaskBus(SearchTaskBus):
             "query_text": search_task.query.text 
         }
         
+        # [DEBUG PRINT]
+        # print(f"[DEBUG] Pushing task to queue '{self.queue_name}': {payload}", flush=True)
+        
         await self._redis.lpush(self.queue_name, json.dumps(payload))
+        
+        # [DEBUG PRINT]
+        # print(f"[DEBUG] Successfully pushed task {search_task.request_id.value}", flush=True)
         
         return search_task.request_id
 
@@ -48,6 +54,9 @@ class RedisSearchTaskBus(SearchTaskBus):
         if result:
             _, raw_payload = result
             data = json.loads(raw_payload)
+            
+            # [DEBUG PRINT]
+            # print(f"[DEBUG] Popped task from queue '{self.queue_name}': {data['request_id']}", flush=True)
             
             return SearchTask(
                 request_id=RequestID(value=data["request_id"]),
@@ -69,6 +78,8 @@ class RedisSearchTaskBus(SearchTaskBus):
             "metadata": result.metadata
         }
         
+        # [DEBUG PRINT]
+        # print(f"[DEBUG] Publishing response to channel '{specific_channel}'", flush=True)
         
         await self._redis.publish(specific_channel, json.dumps(payload))
 
@@ -78,6 +89,9 @@ class RedisSearchTaskBus(SearchTaskBus):
         pubsub: PubSub = self._redis.pubsub()
         
         try:
+            # [DEBUG PRINT]
+            # print(f"[DEBUG] Subscribing to channel '{specific_channel}'", flush=True)
+            
             await pubsub.subscribe(specific_channel)
             
             async with asyncio.timeout(timeout_seconds):
@@ -85,6 +99,9 @@ class RedisSearchTaskBus(SearchTaskBus):
                     # Ignore standard Redis subscription confirmation messages
                     if message["type"] == "message":
                         data = json.loads(message["data"])
+                        
+                        # [DEBUG PRINT]
+                        # print(f"[DEBUG] Received message on channel '{specific_channel}'", flush=True)
                         
                         return SearchTaskResponse(
                             request_id=RequestID(value=data["request_id"]),
@@ -98,6 +115,8 @@ class RedisSearchTaskBus(SearchTaskBus):
                 raise RuntimeError("Redis PubSub loop exited unexpectedly without a message.")
                         
         except TimeoutError:
+            # [DEBUG PRINT]
+            # print(f"[DEBUG] Subscription timed out for channel '{specific_channel}'", flush=True)
             raise TimeoutError(f"Task {request_id.value} did not complete within {timeout_seconds} seconds.")
             
         finally:

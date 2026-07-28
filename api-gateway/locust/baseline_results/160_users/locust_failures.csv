@@ -1,0 +1,3 @@
+Method,Name,Error,Occurrences,First Seen,Last Seen
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Cache Error: Too many connections""}')",80,2026-07-27T22:54:16Z,2026-07-27T22:54:16Z
+POST,/search,"CatchResponseError('Failed: 500 - {""detail"":""Internal Server Error: Too many connections""}')",1133,2026-07-27T22:54:01Z,2026-07-27T22:54:19Z

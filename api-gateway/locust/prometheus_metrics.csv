@@ -1,0 +1,8 @@
+timestamp,component,avg_latency_ms,memory_mb,redis_queue_size
+2026-07-27T18:48:28.694353,mcp_plan,632.32,0.02,0.0
+2026-07-27T18:48:28.694353,db_filter_tool,477.16,0.46,0.0
+2026-07-27T18:48:28.694353,graph_executor,485.43,0.0,0.0
+2026-07-27T18:48:28.694353,mcp_answer,826.15,0.01,0.0
+2026-07-27T18:48:28.694353,vector_search_tool,nan,0.3,0.0
+2026-07-27T18:48:28.694353,metadata_filter_tool,nan,0.01,0.0
+2026-07-27T18:48:28.694353,web_search_tool,nan,0.45,0.0

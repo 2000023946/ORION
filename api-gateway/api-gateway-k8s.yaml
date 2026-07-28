@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: api-gateway
 spec:
-  replicas: 4 # Updated to match your pre-scaled HPA
+  replicas: 1
   selector:
     matchLabels:
       app: api-gateway
@@ -26,28 +26,21 @@ spec:
         app: api-gateway
     spec:
       # ==========================================
-      # NEW: OS Socket Backlog Expansion
-      # ==========================================
-      securityContext:
-        sysctls:
-        - name: net.core.somaxconn
-          value: "4096"
-        - name: net.ipv4.tcp_max_syn_backlog
-          value: "4096"
+      # OS Socket Backlog Expansion (Safe Sysctl)
+
       containers:
       - name: api-gateway
-        image: 2000023946/orion-api:latest # Updated to match your Docker Hub tag!
+        image: 2000023946/orion-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
-        # The HPA requires these requests/limits to calculate CPU percentages
         resources: 
           requests:
             cpu: "250m"
             memory: "256Mi"
           limits:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "250m"
+            memory: "256Mi"
         env:
           - name: METADATA_DB_URL
             value: "mongodb://orion-mongodb:27017"
@@ -59,13 +52,9 @@ spec:
             value: "redis://orion-redis:6379/0"
           - name: CACHE_TARGET_ADDRESS
             value: "redis://orion-redis:6379/1"
-          # ==========================================
-          # NEW: Enterprise Vector Store Connection
-          # ==========================================
           - name: QDRANT_TARGET_ADDRESS
             value: "http://orion-qdrant:6333" 
 ---
-# The Autoscaler configuration
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -75,8 +64,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: api-gateway
-  minReplicas: 4
-  maxReplicas: 4 
+  minReplicas: 1
+  maxReplicas: 1
   metrics:
   - type: Resource
     resource:

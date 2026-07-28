@@ -50,13 +50,14 @@ def main():
             try:
                 df_prom = pd.read_csv(prom_file)
                 if not df_prom.empty:
-                    prom_agg = df_prom.groupby('component')[['avg_latency_ms', 'memory_mb']].mean().reset_index()
+                    prom_agg = df_prom.groupby('component')[['avg_latency_ms', 'memory_mb', 'redis_queue_size']].mean().reset_index()
                     for _, row in prom_agg.iterrows():
                         prom_data.append({
                             'Users': users,
                             'Component': row['component'],
                             'Avg Latency (ms)': row['avg_latency_ms'],
-                            'Memory (MB)': row['memory_mb']
+                            'Memory (MB)': row['memory_mb'],
+                            'Redis Queue Size': row.get('redis_queue_size', 0)
                         })
             except Exception as e:
                 print(f"Error reading {prom_file}: {e}")
@@ -99,7 +100,7 @@ def main():
         
         html_content += f"<div class='chart-container'><h2>Locust Core Statistics</h2>{fig1.to_html(full_html=False, include_plotlyjs='cdn')}</div>"
 
-    # Figures 2 & 3: Prometheus Metrics (Latency & Memory)
+    # Figures 2, 3 & 4: Prometheus Metrics (Latency, Memory, & Redis Queue)
     if not df_prom_plot.empty:
         components = df_prom_plot['Component'].unique()
         
@@ -120,6 +121,15 @@ def main():
             
         fig3.update_layout(title="Component Memory vs Users", xaxis_title="Number of Users", yaxis_title="Memory (MB)", height=500, template="plotly_white", hovermode="x unified")
         html_content += f"<div class='chart-container'><h2>Prometheus: Component Memory</h2>{fig3.to_html(full_html=False, include_plotlyjs=False)}</div>"
+
+        # Prometheus Redis Queue Size
+        fig4 = go.Figure()
+        # Since redis_queue_size is identical across rows for the same user tier, we can drop duplicates for the x/y trace
+        df_redis = df_prom_plot.drop_duplicates(subset=['Users'])
+        fig4.add_trace(go.Scatter(x=df_redis['Users'], y=df_redis['Redis Queue Size'], mode='lines+markers', name='orion_queue', line=dict(color='#9b59b6', width=3)))
+        
+        fig4.update_layout(title="Redis Queue Size (orion_queue) vs Users", xaxis_title="Number of Users", yaxis_title="Queue Depth / Key Size", height=500, template="plotly_white", hovermode="x unified")
+        html_content += f"<div class='chart-container'><h2>Prometheus: Redis Queue Depth</h2>{fig4.to_html(full_html=False, include_plotlyjs=False)}</div>"
 
     html_content += """
         </div>
