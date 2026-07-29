@@ -315,7 +315,6 @@ data:
       options:
         path: /var/lib/grafana/dashboards
 ---
-# The Dashboard JSON (Your pre-configured PromQL panels)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -349,6 +348,48 @@ data:
               "refId": "B"
             }
           ]
+        },
+        {
+          "title": "Executor Total CPU Usage (Cores)",
+          "type": "timeseries",
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+          "targets": [
+            {
+              "expr": "sum(rate(process_cpu_seconds_total{job=\"orion-executor\"}[30s]))",
+              "legendFormat": "vCPU Cores",
+              "refId": "C"
+            }
+          ]
+        },
+        {
+          "title": "Executor Total Memory Usage (MB)",
+          "type": "timeseries",
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+          "targets": [
+            {
+              "expr": "sum(process_resident_memory_bytes{job=\"orion-executor\"}) / 1024 / 1024",
+              "legendFormat": "Memory (MB)",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "title": "Component Latency Breakdown (Avg ms)",
+          "type": "timeseries",
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+          "targets": [
+            {
+              "expr": "sum by (component) (rate(orion_component_duration_ms_sum[1m])) / sum by (component) (rate(orion_component_duration_ms_count[1m]))",
+              "legendFormat": "{{component}}",
+              "refId": "E"
+            }
+          ],
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right"
+            }
+          }
         }
       ],
       "schemaVersion": 36
