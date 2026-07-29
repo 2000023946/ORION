@@ -17,9 +17,9 @@ PROMETHEUS_URL = "http://localhost:9090"  # Ensure kubectl port-forward is runni
 
 # Define your test phases: list of tuples (RPS, duration_in_seconds)
 TEST_PLAN = [
-    (8, 90),
     (16, 90),
     (32, 90),
+    (64, 90),
 ]
 
 COOLDOWN_SECONDS = 15  # Time to wait between tests to let queues drain

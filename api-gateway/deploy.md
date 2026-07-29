@@ -32,7 +32,7 @@ kubectl rollout restart deployment orion-executor
 ### 4. Forward API and Prometheus Port for Clients
 
 ```bash
-kubectl port-forward deployment/prometheus-deployment 9090:9090
+kubectl port-forward deployment/prometheus 9090:9090
 kubectl port-forward deployment/api-gateway 8000:8000
 ```
 
