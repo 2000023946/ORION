@@ -60,6 +60,11 @@ spec:
         env:
         - name: PROMETHEUS_PORT
           value: "8081"
+        resources:
+          requests:
+            cpu: "2"
+          limits:
+            cpu: "4" # Caps TEI so it doesn't crash the Minikube VM
 ---
 apiVersion: v1
 kind: Service
@@ -84,7 +89,7 @@ metadata:
 data:
   prometheus.yml: |
     global:
-      scrape_interval: 5s
+      scrape_interval: 1s
     scrape_configs:
       - job_name: 'orion-executor'
         static_configs:
@@ -256,7 +261,7 @@ spec:
         - name: REDIS_ADDR
           value: "redis://orion-redis:6379"  # Fixed to match your exact Redis service name
         args:
-          - "-check-keys=orion_queue"        # Tracks LLEN/size for your task queue key
+          - "-check-keys=queue:search_tasks"        # Tracks LLEN/size for your task queue key
         ports:
         - containerPort: 9121
           name: metrics

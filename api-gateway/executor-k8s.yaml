@@ -77,15 +77,20 @@ spec:
     name: orion-executor
   minReplicaCount: 1
   # Capped at 4 to prevent your local macOS Minikube environment from locking up under heavy load testing
-  maxReplicaCount: 1
-  pollingInterval: 15
+  maxReplicaCount: 3
+  pollingInterval: 3
   cooldownPeriod: 60
   triggers:
   - type: prometheus
     metadata:
-      # Maps directly to your Prometheus Service (Service: prometheus, Port: 9090)
-      # Uses the fully qualified domain name since KEDA runs in its own namespace
       serverAddress: http://prometheus.default.svc.cluster.local:9090
-      metricName: orion_queue_depth
-      query: sum(orion_queue_depth)
-      threshold: "10"
+      
+      # An internal name KEDA uses to register the metric with the HPA
+      metricName: orion_queue_depth_keda
+      
+      # Use the exact working query from your python script
+      # The '|' character ensures the query is passed as a raw string
+      query: |
+        sum(max_over_time(redis_key_size{key="queue:search_tasks"}[30s]))
+        
+      threshold: "5"
