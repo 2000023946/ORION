@@ -26,7 +26,12 @@ class SearchTaskBus(ABC):
 
     @abstractmethod
     async def pop_task(self) -> SearchTask | None:
-        """Worker pulls a task from the queue. Should yield control to the event loop while waiting."""
+        """Worker pulls a single task from the queue. Should yield control to the event loop while waiting."""
+        pass
+
+    @abstractmethod
+    async def pop_tasks(self, batch_size: int) -> list[SearchTask]:
+        """Worker pulls up to `batch_size` tasks from the queue in one round-trip."""
         pass
 
     @abstractmethod

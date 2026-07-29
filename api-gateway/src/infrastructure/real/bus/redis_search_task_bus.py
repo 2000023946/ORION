@@ -21,6 +21,19 @@ class RedisSearchTaskBus(SearchTaskBus):
         self._queue_name = queue_name
         self._channel_prefix = channel_prefix
 
+        # Lua script to perform atomic FIFO bulk RPOP across any Redis version
+        self._pop_tasks_script = self._redis.register_script("""
+            local key = KEYS[1]
+            local count = tonumber(ARGV[1])
+            local result = {}
+            for i = 1, count do
+                local item = redis.call('RPOP', key)
+                if not item then break end
+                table.insert(result, item)
+            end
+            return result
+        """)
+
     @property
     def queue_name(self) -> str:
         return self._queue_name
@@ -65,6 +78,30 @@ class RedisSearchTaskBus(SearchTaskBus):
             
         # Return None gracefully instead of crashing
         return None
+    
+    async def pop_tasks(self, batch_size: int) -> list[SearchTask]:
+        """
+        Bulk Pop Method (FIFO: Right Pop).
+        Pulls up to `batch_size` tasks in a single network round-trip via Lua script.
+        Non-blocking: returns immediately with whatever is available (possibly empty).
+        """
+        if batch_size <= 0:
+            return []
+
+        results = await self._pop_tasks_script(keys=[self.queue_name], args=[batch_size])
+
+        if not results:
+            return []
+
+        tasks = []
+        for raw_payload in results:
+            data = json.loads(raw_payload)
+            tasks.append(SearchTask(
+                request_id=RequestID(value=data["request_id"]),
+                query=Query(text=data["query_text"])
+            ))
+
+        return tasks
 
     async def publish(self, result: SearchTaskResponse) -> None:
         """Worker broadcasts the completed task response."""

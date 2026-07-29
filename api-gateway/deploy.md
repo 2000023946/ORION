@@ -25,6 +25,7 @@ Once both images are pushed, roll out the updates in your cluster so Kubernetes 
 ```bash
 kubectl rollout restart deployment api-gateway
 kubectl rollout restart deployment orion-executor
+
 ```
 
 
