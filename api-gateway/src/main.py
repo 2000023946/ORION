@@ -74,7 +74,6 @@ async def search(req: SearchRequest):
     try:
         cached_response = await cache_infras.cache.get_answer(query)
         if cached_response:
-            
             # Tag it so the frontend knows it was lightning fast
             metadata = cached_response.metadata or {}
             metadata['gateway_cached'] = True

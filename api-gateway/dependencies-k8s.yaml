@@ -278,11 +278,11 @@ spec:
       port: 9121
       targetPort: 9121
 
----
+--- 
 # ==========================================
 # 7. Grafana Observability Dashboard
 # ==========================================
-# Data Source Provisioning (Prometheus connection)
+# 1. Data Source Provisioning (Prometheus Connection)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -297,7 +297,7 @@ data:
       access: proxy
       isDefault: true
 ---
-# Dashboard Provider (Tells Grafana to load files from disk)
+# 2. Dashboard Provider (Configures Grafana to read dashboards from disk)
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -315,6 +315,7 @@ data:
       options:
         path: /var/lib/grafana/dashboards
 ---
+# 3. Dashboard Definition ConfigMap
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -395,6 +396,7 @@ data:
       "schemaVersion": 36
     }
 ---
+# 4. Grafana Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -434,6 +436,7 @@ spec:
         configMap:
           name: grafana-dashboards
 ---
+# 5. Grafana Service
 apiVersion: v1
 kind: Service
 metadata:
