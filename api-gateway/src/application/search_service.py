@@ -11,7 +11,7 @@ from src.application.bus.search_task_response import SearchTaskResponse
 uvloop.install()
 
 class SearchService:
-    def __init__(self, use_case: SearchUseCase, task_bus: SearchTaskBus, max_workers: int = 48, queue_maxsize: int = 100) -> None:
+    def __init__(self, use_case: SearchUseCase, task_bus: SearchTaskBus, max_workers: int = 200, queue_maxsize: int = 500) -> None:
         self.use_case = use_case
         self.task_bus = task_bus
         self.max_workers = max_workers
@@ -24,34 +24,35 @@ class SearchService:
     async def execute(self):
         self._is_running = True
         
-        # 1. Start our fixed pool of worker execution units (strictly capped at max_workers)
         self._worker_tasks = [
             asyncio.create_task(self._worker_loop(i)) 
             for i in range(self.max_workers)
         ]
         
-        # 2. Polling loop: Pulls tasks from Redis in batches and pushes them to the internal queue
         while self._is_running:
             try:
-                # Pull up to our max_workers capacity in a single network trip
-                tasks = await self.task_bus.pop_tasks(batch_size=self.max_workers)
+                free_space = self._internal_queue.maxsize - self._internal_queue.qsize()
                 
-                if not tasks:
-                    await asyncio.sleep(0.1) 
-                    continue
-                
-                # Push tasks into the internal queue; this will block if the queue is full,
-                # acting as backpressure against Redis.
-                for task in tasks:
-                    await self._internal_queue.put(task)
+                if free_space > 0:
+                    tasks = await self.task_bus.pop_tasks(batch_size=free_space)
+                    
+                    if not tasks:
+                        await asyncio.sleep(0.1) 
+                        continue
+                    
+                    for task in tasks:
+                        await self._internal_queue.put(task)
+                else:
+                    # The queue is full. 
+                    # Instead of sleeping 0.5s, yield control briefly. 
+                    # The workers will process tasks and make space.
+                    await asyncio.sleep(0.01)
                 
             except asyncio.CancelledError:
-                self._is_running = False
                 break
             except Exception as e:
-                logging.error(f"Error in execution loop polling tasks: {e}")
-                print_exc()
-
+                logging.error(f"Error in execution loop: {e}")
+    
     async def _worker_loop(self, worker_id: int):
         """Dedicated worker consumer pulling from the internal queue."""
         while self._is_running:
