@@ -7,7 +7,7 @@
 
 Designed to eliminate the rigid constraints of fixed pipelines, Orion builds **dynamic retrieval DAGs** on the fly. It leverages a resilient, load-buffered architecture—combining an API Gateway, distributed message queuing, and a Redis edge cache—to effortlessly absorb massive concurrent traffic spikes.
 
-### Built for Cloud-Native Scale & Observability
+### Built for Scale & Observability
 
 Orion doesn't just orchestrate; it scales gracefully under pressure.
 
