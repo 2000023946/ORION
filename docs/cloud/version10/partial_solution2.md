@@ -4,7 +4,7 @@ Increasing workers to 96 improved handling at 16 RPS, but also revealed why a si
 
 ---
 
-## 📊 Benchmarking Comparison: 48 Workers vs. 96 Workers
+## Benchmarking Comparison: 48 Workers vs. 96 Workers
 
 | Profile | Metric | 48 Workers (`queue_maxsize=100`) | **96 Workers (`queue_maxsize=500`)** | Impact / Delta |
 | --- | --- | --- | --- | --- |

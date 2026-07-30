@@ -1,4 +1,4 @@
-## 📊 Load Test Incident Report
+## Load Test Incident Report
 
 **Configuration Context:**
 

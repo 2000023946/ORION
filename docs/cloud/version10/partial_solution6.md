@@ -6,7 +6,7 @@ Here is the report breaking down exactly what your data proves.
 
 ---
 
-## 📊 Load Test Analysis: The I/O Starvation Problem
+## Load Test Analysis: The I/O Starvation Problem
 
 ### The Smoking Gun: CPU Usage at 64 RPS
 

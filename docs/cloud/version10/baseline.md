@@ -4,7 +4,7 @@ Here is the formal architectural report based on your data and root-cause analys
 
 ---
 
-## 🚀 Kubernetes Microservice Load Test: Performance & Failure Analysis Report
+## Kubernetes Microservice Load Test: Performance & Failure Analysis Report
 
 ### 1. Master Data Comparison
 

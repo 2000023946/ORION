@@ -1,4 +1,4 @@
-## 🚀 Architectural Benchmarking Report: Batch Ingestion & Fixed Worker Pool
+## Architectural Benchmarking Report: Batch Ingestion & Fixed Worker Pool
 
 ### Executive Summary
 

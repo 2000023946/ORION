@@ -1,10 +1,10 @@
-# 🚀 Final Load Test & Architecture Report: Kubernetes Search Microservice
+# Final Load Test & Architecture Report: Kubernetes Search Microservice
 
 ## Executive Summary: The 32x Throughput Leap
 
 The architectural transition from sequential, single-task polling to **bulk Redis queue reads** paired with **`asyncio` coroutines** was a complete success. By decoupling the I/O polling from the task execution, the single-pod capacity successfully scaled from a baseline of 1 RPS up to a highly stable **32 RPS**—a 3200% increase in throughput.
 
-## 📊 Worker Pool Comparison: 196 vs. 300 Workers (1.0 vCPU)
+## Worker Pool Comparison: 196 vs. 300 Workers (1.0 vCPU)
 
 The final testing phase compared a 196-worker pool against a 300-worker pool on a 1.0 vCPU allocation. The data proves that a higher worker count provides a crucial concurrency buffer, resulting in drastically higher efficiency at target loads.
 
