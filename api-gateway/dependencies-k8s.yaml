@@ -375,22 +375,16 @@ data:
           ]
         },
         {
-          "title": "Component Latency Breakdown (Avg ms)",
+          "title": "SearchResponse Latency (ms)",
           "type": "timeseries",
-          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
           "targets": [
             {
-              "expr": "sum by (component) (rate(orion_component_duration_ms_sum[1m])) / sum by (component) (rate(orion_component_duration_ms_count[1m]))",
-              "legendFormat": "{{component}}",
+              "expr": "rate(orion_component_duration_ms_sum{component=\"SearchResponse\"}[1m]) / rate(orion_component_duration_ms_count{component=\"SearchResponse\"}[1m])",
+              "legendFormat": "Latency (ms)",
               "refId": "E"
             }
-          ],
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "right"
-            }
-          }
+          ]
         }
       ],
       "schemaVersion": 36

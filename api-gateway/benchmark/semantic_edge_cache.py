@@ -235,6 +235,7 @@ def generate_html_report(results):
         <table>
             <thead>
                 <tr>
+                
                     <th>Query</th>
                     <th>Query Text</th>
                     <th>Status</th>

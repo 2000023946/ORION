@@ -1,117 +1,41 @@
-This 7-point roadmap hits every single critique from the Checkpoint 3 feedback and elevates Orion into a top-tier, production-grade distributed system.
+Here's the core list, explained plainly — these are the properties that actually define "cloud native," not just "runs on a cloud provider."
 
-By adding multi-tier caching (semantic edge cache + L1 worker cache) and queue fault tolerance (circuit breaker fallback), you are moving beyond standard microservices into true resilient enterprise architecture.
+## 1. Containerization
+Your app packaged into a standardized, portable unit (Docker/OCI image) that runs the same way everywhere — your laptop, staging, production. This is the foundation everything else builds on.
+*You have this.*
 
-Here is how each component of your Checkpoint 4 plan maps to an enterprise computing standard:
+## 2. Orchestration
+Something automatically manages where containers run, restarts them on failure, and reschedules them if a node dies — Kubernetes is the standard here. You don't manually decide "run this container on this server."
+*You have this (K8s cluster).*
 
----
+## 3. Microservices / loose coupling
+The system is split into independently deployable services that talk over network APIs (REST, gRPC, queues) rather than one giant monolith. Each piece can be built, scaled, and deployed on its own schedule.
+*You have this (gateway / queue / workers are separate).*
 
-## The Checkpoint 4 Master Blueprint
+## 4. Elastic, automated scaling
+The system adds/removes capacity automatically based on real demand signals (CPU, memory, queue depth, request rate) — not manually by a human watching a dashboard.
+*You have this (HPA on queue depth).*
 
-```
-                     [ Incoming Search Request ]
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │       API Gateway       │
-                     └────────────┬────────────┘
-                                  │
-                  ┌───────────────┴───────────────┐
-                  ▼                               ▼
-       [ Tier 1: Edge Cache ]            [ Circuit Breaker ]
-     (Semantic / Vector Match)           (Queue Availability)
-                  │                               │
-            ┌─────┴─────┐                   ┌─────┴─────┐
-       Cache│           │Cache          Healthy│         │Unhealthy
-        Hit │           │Miss               │         │(Fallback)
-            ▼           ▼                   ▼         ▼
-       [ Return ]   [ Queue ]          [ Redis ]  [ Direct Sync Call ]
-                                            │
-                                            ▼
-                                   [ KEDA Autoscaler ]
-                                (Reads queue depth metric)
-                                            │
-                                            ▼
-                                  [ Worker Pod Pool ]
-                                 ┌──────────────────┐
-                                 │  L2 Worker Cache │
-                                 │  (In-Memory LRU) │
-                                 └──────────────────┘
+## 5. Self-healing / resilience
+The system detects failures (crashed pod, hung process, failed health check) and recovers automatically — restarts, reschedules, reroutes traffic — without a human intervening.
+*I have this*
 
-```
+## 6. Statelessness
+Compute instances (pods) hold no critical state locally. If a pod dies, nothing is lost, because state lives in external stores — databases, queues, object storage. This is *what makes* self-healing safe.
+*Partially — depends on whether your queue does proper ack/redelivery, worth verifying.*
+
+## 7. Declarative infrastructure ("infrastructure as code")
+Your infrastructure is described in config files (YAML, Terraform) describing the *desired end state*, and a tool reconciles reality to match it — rather than you SSH-ing in and running commands by hand.
+*Depends whether your K8s manifests are applied via IaC/GitOps or manually with `kubectl apply`.*
+
+## 8. Automated CI/CD
+Code changes flow from commit → build → test → deploy automatically, with immutable artifacts (you rebuild a new image, you don't patch a running container).
+*Unknown from what you've described — worth checking if you have this.*
+
+## 9. Observability
+You can see what's happening across the whole distributed system — metrics (aggregate health), logs (what happened), and ideally traces (following one request across services) — not just "SSH in and read a log file."
+*You have metrics (Grafana). Logs/traces likely still a gap.*
 
 ---
 
-### 1. Docs & Test Coverage Artifacts (Addressing Grader Feedback)
-
-* **Academic Tone Rewrite:** Remove emojis, informal conversational turns, and portfolio framing from all files under `./docs/cloud/`. Use formal, third-person engineering terminology.
-* **Coverage Artifact:** Run your pytest suite with HTML generation and commit the `htmlcov/` folder or a `coverage.xml` summary directly into the repository root.
-* **Clean Plan Tables:** Remove all leftover template lines and populate the Checkpoint 4 row in your deliverables matrix.
-
-### 2. KEDA Queue-Depth Autoscaling
-
-* **Source:** Pull from the TA's `ai-suggestions/cp4` branch.
-* **Mechanism:** Expose the `orion_queue_depth` metric via Prometheus. Configure KEDA's `ScaledObject` resource to dynamically scale the worker deployment when queue depth exceeds a target threshold (e.g., `queueLength > 10`).
-* **Validation:** Run Locust load tests comparing standard CPU-based HPA against KEDA event-driven scaling, recording the peak replica counts and queue draining rates.
-
-### 3. Optimized Api Gateway Network
-
-* **Pre-Scale Ingestion Capacity:** Configure the `api-gateway` HPA with 4 `minReplicas` to guarantee immediate compute availability and bypass the inherent scheduling lag of reactive CPU metrics during instantaneous traffic spikes.
-* **Expand OS Socket Backlogs:** Tune the underlying operating system network parameters by increasing the `SOMAXCONN` and `tcp_max_syn_backlog` limits to enlarge the TCP waiting room and prevent immediate connection drops at the kernel level.
-* **Implement Connection Pooling:** Establish persistent TCP stream channels between the API Gateway and Redis upon pod startup to eliminate the severe CPU overhead generated by continuous three-way handshakes for every incoming request.
-
-### 4. Multi-Tier Caching Strategy
-
-* **Tier 1 (Edge / Gateway): Semantic Vector Cache**
-* Instead of exact string matching on Redis keys (e.g., `"weather in atlanta"` vs `"atlanta weather"`), generate lightweight query embeddings (or hash-based key normalizations) at the API Gateway.
-* Check cosine similarity against recently cached query results before enqueuing work.
-
-
-* **Tier 2 (Worker Pods): Local L1 In-Memory Cache**
-* Implement an in-process, TTL-backed LRU cache inside the worker pod executor.
-* If two identical or overlapping sub-queries reach the worker pool concurrently, the worker resolves the response instantly from process RAM without executing external MCP tool network requests.
-
-
-
-### 5. Queue Fault Tolerance & Resilient Fallback
-
-* **The Scenario:** What happens if the Redis broker pod crashes or network partitions render the queue unreachable?
-* **The Enterprise Pattern (Circuit Breaker):**
-* Implement a circuit breaker wrapped around the queue producer client in the API Gateway.
-* If Redis connection timeouts spike, the Gateway transitions to **Degraded Mode**: bypassing the queue to execute search calls synchronously (with throttled rate limits) or returning a graceful fallback response instead of throwing unhandled 500 exceptions.
-
-
-
-### 6. Theoretical Capacity Modeling
-
-* **Mathematical Model:** Document system throughput using Little’s Law:
-
-$$RPS_{\text{max}} = \frac{N_{\text{workers}}}{T_{\text{execution}}}$$
-
-
-* **Capacity Contrast Table:** Formally contrast the physical bounds of your 4GB local Minikube environment against an elastic cloud topology (AWS EKS / GCP GKE) bounded only by external downstream API rate limits.
-
-### 7. Prometheus & Grafana Observability Dashboard
-
-* **Telemetry Integration:** Stand up a lightweight Grafana container scraping your cluster's Prometheus server.
-* **Key Panels:**
-1. **Ingress RPS vs. Queue Depth (`orion_queue_depth`)**
-2. **KEDA Worker Replica Count (Scaling Delta)**
-3. **p50 / p95 / p99 Query Latency**
-4. **Cache Hit Rate (Tier 1 Vector vs. Tier 2 Worker L1)**
-
-
-
-### 8. Final Presentation Video (3–5 Minutes)
-
-* **Structure:**
-1. **Architecture Overview (1 min):** Highlight the evolution from monolith to buffered, multi-tier microservices.
-2. **KEDA Live Demo (1.5 mins):** Launch a Locust load spike, show `orion_queue_depth` triggering KEDA pod autoscaling in `kubectl get pods -w` and Grafana.
-3. **Fault Tolerance Test (1 min):** Kill the Redis queue container live to show the API Gateway's circuit breaker fall back without crashing.
-4. **Conclusion (30 secs):** Summary of empirical load testing results and theoretical limits.
-
-
-
----
-
-This execution plan covers every requirement, addresses all previous feedback, and demonstrates high-level system design expertise.
+**The honest summary for your video:** you have strong coverage of orchestration, elastic scaling, and observability (metrics). Your two biggest legitimate gaps are self-healing (fixable with probes, ~30 min) and verified statelessness (fixable by testing/demoing the pod-kill scenario). CI/CD and full declarative infra are likely partial or missing — naming that honestly is fine and shows you understand the full picture rather than just the part you built.

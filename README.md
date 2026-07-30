@@ -178,7 +178,9 @@ All outputs are automatically structured and archived hierarchically within the 
 
 Upon completion, the orchestration runner dynamically compiles raw metrics logs and pulls data from Prometheus, auto-generating a standalone visual file: `comprehensive_metrics_dashboard.html`. This report provides localized visualization of failure distributions, resource-to-request trends, and cache hit/miss advantages across massive traffic gradients.
 
----
+Additionally, targeted component profiling is handled within the `api-gateway/benchmark/` directory. This includes a dedicated monitoring script that actively tracks CPU utilization, memory consumption, end-to-end latency, and queue size during benchmark runs, as well as `semantic_edge_cache.py`, which executes specific query payloads to validate and explicitly measure hit versus miss rates for the semantic edge cache.
+
+--- 
 
 # Advanced Usage (Development + Testing)
 
@@ -222,7 +224,7 @@ pip install -r requirements.txt
 
 # Testing Overview
 
-Orion includes **~95% unit test coverage** across the core system. The results can 
+Orion includes **~87% unit test coverage** across the core system. The results can 
 be seen in `htmlcov/index.html`
 
 ---
@@ -292,7 +294,7 @@ python3 test.graph_executor.py
 # Key Idea
 
 * **Frontend demo** → shows full system working end-to-end
-* **Unit tests (~95%)** → ensure core MCP logic is correct and stable
+* **Unit tests (~87%)** → ensure core MCP logic is correct and stable
 * **Scripts** → quick API/system validation tools
 * **Integrated tests** → deep component-level debugging of MCP orchestration
 
@@ -305,7 +307,7 @@ python3 test.graph_executor.py
 | Frontend (localhost:3000) | Live demo / UI experience             |
 | scripts/                  | API + system utilities                |
 | scripts/run_test.sh       | Main unit test runner                 |
-| tests/unit                | Core logic validation (~95% coverage) |
+| tests/unit                | Core logic validation (~87% coverage) |
 | tests/integrated          | Full MCP component-level debugging    |
 
 ---

@@ -41,6 +41,18 @@ spec:
           limits:
             cpu: "250m"
             memory: "256Mi"
+          livenessProbe:          # <-- HERE
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:          # <-- HERE
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
         env:
           - name: METADATA_DB_URL
             value: "mongodb://orion-mongodb:27017"

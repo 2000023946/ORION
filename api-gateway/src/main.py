@@ -135,3 +135,12 @@ async def search(req: SearchRequest):
     except Exception as e:
         # Catch any Redis connection failures or unexpected crashes and raise them explicitly
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/ready")
+def ready():
+    return {"status": "ok"}

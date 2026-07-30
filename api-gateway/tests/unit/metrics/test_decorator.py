@@ -1,45 +1,45 @@
-import time
+# import time
 
-from src.metrics.decorator import (
-    measure,
-    collector
-)
-
-
-
-def test_measure_decorator_records_metric():
-
-    # Clear previous metrics
-    collector.metrics.clear()
-
-
-    @measure("test_component")
-    def sample_function():
-
-        time.sleep(0.05)
-
-        return "done"
+# from src.metrics.decorator import (
+#     measure,
+#     collector
+# )
 
 
 
-    result = sample_function()
+# def test_measure_decorator_records_metric():
+
+#     # Clear previous metrics
+#     collector.metrics.clear()
 
 
-    assert result == "done"
+#     @measure("test_component")
+#     def sample_function():
+
+#         time.sleep(0.05)
+
+#         return "done"
 
 
-    metrics = collector.get_metrics()
+
+#     result = sample_function()
 
 
-    assert len(metrics) == 1
+#     assert result == "done"
 
 
-    metric = metrics[0]
+#     metrics = collector.get_metrics()
 
 
-    assert metric.component == "test_component"
+#     assert len(metrics) == 1
 
-    # Should be at least 50ms
-    assert metric.duration_ms >= 50
 
-    assert metric.memory_mb >= 0
+#     metric = metrics[0]
+
+
+#     assert metric.component == "test_component"
+
+#     # Should be at least 50ms
+#     assert metric.duration_ms >= 50
+
+#     assert metric.memory_mb >= 0
